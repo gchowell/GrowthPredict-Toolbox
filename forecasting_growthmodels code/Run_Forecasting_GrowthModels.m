@@ -215,6 +215,10 @@ AICcs=[];
 
 for i=tstart1:1:tend1  %rolling window analysis
 
+    if (tend1-tstart1)>10
+        close all
+    end
+
     figure(100+i)
 
     t_window=i:1:i+windowsize1-1;

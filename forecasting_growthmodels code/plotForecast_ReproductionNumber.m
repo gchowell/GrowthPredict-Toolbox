@@ -231,12 +231,15 @@ else
     cols=factors(2);
 end
 
-
 cc1=1;
 
 param_R=[];
 
 for i=tstart1:1:tend1  %rolling window analysis
+
+    if (tend1-tstart1)>10
+        close all
+    end
 
     load(strcat('./output/Forecast-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(i),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-',num2str(forecastingperiod),'.mat'))
 
