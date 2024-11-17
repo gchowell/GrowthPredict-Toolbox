@@ -812,7 +812,7 @@ separator = '<==================================================================
 
 % Display options_fit.m header
 disp(separator);
-disp('**************************** options_fit.m ***********************************');
+disp('**************************** options_forecast.m ***********************************');
 disp(separator);
 
 % Display Datasets properties
@@ -845,6 +845,24 @@ fprintf('model_name1: %-20s\t(String) Name of the model.\n', model_name1);
 fprintf('fixI0:       %-20s\t(Boolean) Fix initial value in time-series (true/false).\n', num2str(fixI0));
 
 disp(separator);
+
+% Display Forecasting Parameters
+disp('<============================================================================>');
+disp('                          Forecasting Parameters                             ');
+disp('<============================================================================>');
+
+% Display getperformance
+if getperformance
+    performance_status = 'Enabled'; % Convert to a descriptive string
+else
+    performance_status = 'Disabled';
+end
+disp(['  - Forecasting Performance Metrics: ', performance_status]);
+
+% Display forecastingperiod
+disp(['  - Forecast Horizon: ', num2str(forecastingperiod), ' time units ahead']);
+
+disp('<============================================================================>');
 
 % Display Sliding window parameters
 disp('<======================= Sliding window parameters ===========================>');

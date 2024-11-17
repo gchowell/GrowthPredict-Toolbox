@@ -871,6 +871,24 @@ fprintf('fixI0:       %-20s\t(Boolean) Fix initial value in time-series (true/fa
 
 disp(separator);
 
+% Display Forecasting Parameters
+disp('<============================================================================>');
+disp('                          Forecasting Parameters                             ');
+disp('<============================================================================>');
+
+% Display getperformance
+if getperformance
+    performance_status = 'Enabled'; % Convert to a descriptive string
+else
+    performance_status = 'Disabled';
+end
+disp(['  - Forecasting Performance Metrics: ', performance_status]);
+
+% Display forecastingperiod
+disp(['  - Forecast Horizon: ', num2str(forecastingperiod), ' time units ahead']);
+
+disp('<============================================================================>');
+
 % Display Sliding window parameters
 disp('<======================= Sliding window parameters ===========================>');
 disp(separator);
