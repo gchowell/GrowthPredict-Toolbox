@@ -705,3 +705,76 @@ if getperformance && forecastingperiod>0 && isempty(length(MAEFSS))==0
 end
 
 
+
+%%%%%%
+
+
+% Define a separator for clarity
+separator = '<=============================================================================>';
+
+% Display options_fit.m header
+disp(separator);
+disp('**************************** options_forecast.m ***********************************');
+disp(separator);
+
+% Display Datasets properties
+disp('<================================ Datasets properties ========================>');
+disp(separator);
+
+fprintf('cadfilename1: %-30s\t(String) Name of the data file containing time-series data.\n', cadfilename1);
+fprintf('caddisease:    %-30s\t(String) Name of the disease or subject related to the time-series data.\n', caddisease);
+fprintf('datatype:      %-30s\t(String) Nature of the data (cases, deaths, hospitalizations, etc).\n', datatype);
+
+disp(separator);
+
+% Display Parameter estimation details
+disp('<=========================== Parameter estimation ============================>');
+disp(separator);
+
+fprintf('method1:        %-20s\t(Method for optimization).\n', num2str(method1));
+fprintf('dist1:          %-20s\t(Distribution used in the estimation).\n', num2str(dist1));
+fprintf('numstartpoints: %-20s\t(Number of initial guesses for optimization).\n', num2str(numstartpoints));
+fprintf('B:              %-20s\t(Number of bootstrap realizations for uncertainty).\n', num2str(M));
+
+disp(separator);
+
+% Display Growth model details
+disp('<=========================== Growth model ====================================>');
+disp(separator);
+
+fprintf('flag1:       %-20s\t(Integer) Growth model to fit the time-series data.\n', num2str(flag1));
+fprintf('model_name1: %-20s\t(String) Name of the model.\n', model_name1);
+fprintf('fixI0:       %-20s\t(Boolean) Fix initial value in time-series (true/false).\n', num2str(fixI0));
+
+disp(separator);
+
+% Display Forecasting Parameters
+disp('<============================================================================>');
+disp('                          Forecasting Parameters                             ');
+disp('<============================================================================>');
+
+% Display getperformance
+if getperformance
+    performance_status = 'Enabled'; % Convert to a descriptive string
+else
+    performance_status = 'Disabled';
+end
+disp(['  - Forecasting Performance Metrics: ', performance_status]);
+
+% Display forecastingperiod
+disp(['  - Forecast Horizon: ', num2str(forecastingperiod), ' time units ahead']);
+
+disp('<============================================================================>');
+
+% Display Sliding window parameters
+disp('<======================= Sliding window parameters ===========================>');
+disp(separator);
+
+fprintf('windowsize1: %-20s\t(Integer) Moving window size.\n', num2str(windowsize1));
+fprintf('tstart11:    %-20s\t(Integer) Start time point for rolling window analysis.\n', num2str(tstart1));
+fprintf('tend1:       %-20s\t(Integer) End time point for rolling window analysis.\n', num2str(tend1));
+
+disp(separator);
+
+
+
