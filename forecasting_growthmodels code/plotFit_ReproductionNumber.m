@@ -221,7 +221,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_r(1,2) 10;param_r(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('r')
@@ -237,7 +237,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_p(1,2) 10;param_p(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('p')
@@ -254,7 +254,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_a(1,2) 10;param_a(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('a')
@@ -270,7 +270,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_K(1,2) 10;param_K(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('K')
@@ -293,21 +293,21 @@ for i=tstart1:1:tend1 %rolling window analysis
 
         % plot 95% PI
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
         hold on
 
-        line1=plot(timevect2,LB1,'r--')
+        line1=plot(timevect2,LB1,'r--');
         set(line1,'LineWidth',2)
         hold on
 
-        line1=plot(timevect2,UB1,'r--')
+        line1=plot(timevect2,UB1,'r--');
         set(line1,'LineWidth',2)
 
         % plot model fit
 
         color1=gray(8);
-        line1=plot(timevect1,fit_model1,'color',color1(6,:))
+        line1=plot(timevect1,fit_model1,'color',color1(6,:));
         set(line1,'LineWidth',1)
 
         
@@ -362,20 +362,20 @@ for i=tstart1:1:tend1 %rolling window analysis
         writetable(T,strcat('./output/doublingtimes-flag1-',num2str(flag1),'-tstart-',num2str(i),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
         hold on
 
 
         % plot the data
 
-        line1=plot(timevect_all,data_all,'bo')
+        line1=plot(timevect_all,data_all,'bo');
         set(line1,'LineWidth',2)
 
         line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
         if forecastingperiod>0
-            line1=plot(line2(:,1),line2(:,2),'k--')
+            line1=plot(line2(:,1),line2(:,2),'k--');
             set(line1,'LineWidth',2)
         end
 
@@ -433,34 +433,34 @@ for i=tstart1:1:tend1 %rolling window analysis
 
     median1=median(forecast_model12,2);
 
-    line1=plot(timevect2,median1,'r-')
+    line1=plot(timevect2,median1,'r-');
     set(line1,'LineWidth',2)
 
     hold on
-    line1=plot(timevect2,LB1,'r--')
+    line1=plot(timevect2,LB1,'r--');
     set(line1,'LineWidth',2)
 
-    line1=plot(timevect2,UB1,'r--')
+    line1=plot(timevect2,UB1,'r--');
     set(line1,'LineWidth',2)
 
     % plot model fit
 
     color1=gray(8);
-    line1=plot(timevect1,fit_model1,'color',color1(6,:))
+    line1=plot(timevect1,fit_model1,'color',color1(6,:));
     set(line1,'LineWidth',1)
 
-    line1=plot(timevect2,median1,'r-')
+    line1=plot(timevect2,median1,'r-');
     set(line1,'LineWidth',2)
 
     % plot the data
 
-    line1=plot(timevect_all,data_all,'bo')
+    line1=plot(timevect_all,data_all,'bo');
     set(line1,'LineWidth',2)
 
     line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
     if forecastingperiod>0
-        line1=plot(line2(:,1),line2(:,2),'k--')
+        line1=plot(line2(:,1),line2(:,2),'k--');
         set(line1,'LineWidth',2)
     end
 
@@ -479,17 +479,17 @@ for i=tstart1:1:tend1 %rolling window analysis
     %plot(ts(2:end),Rss,'c-')
     %hold on
 
-    line1=plot(ts(2:end),Rtmedian,'r-')
+    line1=plot(ts(2:end),Rtmedian,'r-');
     set(line1,'LineWidth',2)
     hold on
 
-    line1=plot(ts(2:end),RtLB,'r--')
+    line1=plot(ts(2:end),RtLB,'r--');
     set(line1,'LineWidth',2)
-    line1=plot(ts(2:end),RtUB,'r--')
+    line1=plot(ts(2:end),RtUB,'r--');
     set(line1,'LineWidth',2)
 
     line2=[0 1;ts(end) 1];
-    line1=plot(line2(:,1),line2(:,2),'k--')
+    line1=plot(line2(:,1),line2(:,2),'k--');
     set(line1,'LineWidth',2)
 
     [timevect1(1) timevect2(end) 0 quantile(Rss(end/2,:),0.975)+5]
@@ -498,7 +498,7 @@ for i=tstart1:1:tend1 %rolling window analysis
 
     line2=[timevect1(end) 0;timevect1(end) quantile(Rss(end/2,:),0.975)+5];
     
-    line1=plot(line2(:,1),line2(:,2),'k--')
+    line1=plot(line2(:,1),line2(:,2),'k--');
     set(line1,'LineWidth',2)
 
     xlabel('Time')
@@ -648,3 +648,56 @@ end
 
 writetable(T,strcat('./output/parameters-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
+
+
+
+%%%%%%
+
+% Define a separator for clarity
+separator = '<=============================================================================>';
+
+% Display options_fit.m header
+disp(separator);
+disp('**************************** options_fit.m ***********************************');
+disp(separator);
+
+% Display Datasets properties
+disp('<================================ Datasets properties ========================>');
+disp(separator);
+
+fprintf('cadfilename1: %-30s\t(String) Name of the data file containing time-series data.\n', cadfilename1);
+fprintf('caddisease:    %-30s\t(String) Name of the disease or subject related to the time-series data.\n', caddisease);
+fprintf('datatype:      %-30s\t(String) Nature of the data (cases, deaths, hospitalizations, etc).\n', datatype);
+
+disp(separator);
+
+% Display Parameter estimation details
+disp('<=========================== Parameter estimation ============================>');
+disp(separator);
+
+fprintf('method1:        %-20s\t(Method for optimization).\n', num2str(method1));
+fprintf('dist1:          %-20s\t(Distribution used in the estimation).\n', num2str(dist1));
+fprintf('numstartpoints: %-20s\t(Number of initial guesses for optimization).\n', num2str(numstartpoints));
+fprintf('B:              %-20s\t(Number of bootstrap realizations for uncertainty).\n', num2str(M));
+
+disp(separator);
+
+% Display Growth model details
+disp('<=========================== Growth model ====================================>');
+disp(separator);
+
+fprintf('flag1:       %-20s\t(Integer) Growth model to fit the time-series data.\n', num2str(flag1));
+fprintf('model_name1: %-20s\t(String) Name of the model.\n', model_name1);
+fprintf('fixI0:       %-20s\t(Boolean) Fix initial value in time-series (true/false).\n', num2str(fixI0));
+
+disp(separator);
+
+% Display Sliding window parameters
+disp('<======================= Sliding window parameters ===========================>');
+disp(separator);
+
+fprintf('windowsize1: %-20s\t(Integer) Moving window size.\n', num2str(windowsize1));
+fprintf('tstart11:    %-20s\t(Integer) Start time point for rolling window analysis.\n', num2str(tstart1));
+fprintf('tend1:       %-20s\t(Integer) End time point for rolling window analysis.\n', num2str(tend1));
+
+disp(separator);

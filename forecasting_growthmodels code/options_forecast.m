@@ -2,105 +2,101 @@
 % < Author: Gerardo Chowell  ==================================================>
 % <============================================================================>
 
-function [cadfilename1,caddisease,datatype, dist1, numstartpoints,B,flag1,model_name1,fixI0,getperformance,forecastingperiod,windowsize1,tstart1,tend1]=options_forecast
+function [cadfilename1, caddisease, datatype, dist1, numstartpoints, B, flag1, model_name1, fixI0, getperformance, forecastingperiod, windowsize1, tstart1, tend1] = options_forecast
 
 % <============================================================================>
-% <=================== Declare global variables =======================================>
+% <=================== Declare Global Variables ==============================>
 % <============================================================================>
-
-global method1 % Parameter estimation method
-
+% Global variable used to define the parameter estimation method.
+global method1; % Parameter estimation method
 
 % <============================================================================>
-% <================================ Datasets properties =======================>
+% <========================= Dataset Properties ==============================>
 % <============================================================================>
-% The time series data file contains the incidence curve of interest (new cases per unit of time). 
-% The first column corresponds to time index: 0,1,2, ... and the second
-% column corresponds to the temporal incicence data. If the time series file contains cumulative incidence count data, 
-% the name of the time series data file must start with "cumulative".
+% The time series data file contains the incidence curve of interest (e.g., new cases per unit of time).
+% - The first column corresponds to the time index (e.g., 0, 1, 2, ...).
+% - The second column contains the temporal incidence data.
+% Note:
+% - If the file contains cumulative incidence data, its name must start with "cumulative".
 
-cadfilename1='Most_Recent_Timeseries_US-CDC'; % String variable indicating the name of the data file containing the time-series data.
+cadfilename1 = 'Most_Recent_Timeseries_US-CDC'; % Name of the time-series data file
+caddisease = 'Mpox';                            % Name of the disease or subject related to the data
+datatype = 'cases';                             % Type of data (e.g., cases, deaths, hospitalizations)
 
-caddisease='Mpox'; % string variable indicating the name of the disease or subject related to the time series data
+% <============================================================================>
+% <======================= Parameter Estimation ==============================>
+% <============================================================================>
+% Estimation method options:
+% 0 - Nonlinear least squares (LSQ)
+% 1 - Maximum Likelihood Estimation (MLE) Poisson
+% 3 - MLE Negative Binomial (VAR = mean + alpha*mean)
+% 4 - MLE Negative Binomial (VAR = mean + alpha*mean^2)
+% 5 - MLE Negative Binomial (VAR = mean + alpha*mean^d)
 
-datatype='cases'; % string variable indicating the nature of the data (cases, deaths, hospitalizations, etc)
+method1 = 0; % Default estimation method: Nonlinear least squares (LSQ)
 
+% Error structure options based on method1:
+% 0 - Normal distribution (method1 = 0)
+% 1 - Poisson error structure (method1 = 0 or 1)
+% 2 - Negative Binomial (VAR = factor1 * mean, empirically estimated)
+% 3 - MLE Negative Binomial (VAR = mean + alpha*mean)
+% 4 - MLE Negative Binomial (VAR = mean + alpha*mean^2)
+% 5 - MLE Negative Binomial (VAR = mean + alpha*mean^d)
 
-% <=============================================================================>
-% <=========================== Parameter estimation ============================>
-% <=============================================================================>
-
-method1=0; % This integer variable indicates the parameter estimation method employed to estimate the parameters from data. 
-% The following estimation methods are available:
-
-% Nonlinear least squares (LSQ)=0,
-% MLE Poisson=1,
-% MLE (Neg Binomial)=3, with VAR=mean+alpha*mean;
-% MLE (Neg Binomial)=4, with VAR=mean+alpha*mean^2;
-% MLE (Neg Binomial)=5, with VAR=mean+alpha*mean^d;
-
-dist1=0; % This integer variable indicates the error structure assumptions. The following error structure assumptions are available:
-
-
-%dist1=0; % Normal distribution to model error structure (method1=0)
-%dist1=1; % Poisson error structure (method1=0 OR method1=1)
-%dist1=2; % Neg. binomial error structure where var = factor1*mean where
-                  % factor1 is empirically estimated from the time series
-                  % data (method1=0)
-%dist1=3; % MLE (Neg Binomial) with VAR=mean+alpha*mean  (method1=3)
-%dist1=4; % MLE (Neg Binomial) with VAR=mean+alpha*mean^2 (method1=4)
-%dist1=5; % MLE (Neg Binomial)with VAR=mean+alpha*mean^d (method1=5)
-
+dist1 = 0; % Default error structure: Normal distribution
 switch method1
     case 1
-        dist1=1;
+        dist1 = 1; % Poisson error structure
     case 3
-        dist1=3;
+        dist1 = 3; % Negative Binomial (VAR = mean + alpha*mean)
     case 4
-        dist1=4;
+        dist1 = 4; % Negative Binomial (VAR = mean + alpha*mean^2)
     case 5
-        dist1=5;
+        dist1 = 5; % Negative Binomial (VAR = mean + alpha*mean^d)
 end
 
-numstartpoints=10; % This variable defines the number of different initial guesses for the optimization procedure using Multistart 
-% in its search for the globally optimal set of parameters.
+% Optimization settings:
+numstartpoints = 10; % Number of initial guesses for global optimization (Multistart)
+B = 300;             % Number of bootstrap realizations for parameter uncertainty characterization
 
-B=300; % Number of bootstrap realizations utilized to characterize parameter uncertainty.
+% <============================================================================>
+% <========================== Growth Model ===================================>
+% <============================================================================>
+% Growth model options:
+% -1: Exponential growth (EXP)
+%  0: Generalized Growth Model (GGM)
+%  1: Logistic Model (GLM)
+%  2: Generalized Richards Model (GRM)
+%  3: Linear Model (LM)
+%  4: Richards Model (RICH)
+%  5: Gompertz Model (GOM)
 
-% <==============================================================================>
-% <============================== Growth model =====================================>
-% <==============================================================================>
+EXP = -1;  GGM = 0;  GLM = 1;  GRM = 2;  LM = 3;  RICH = 4;  GOM = 5;
 
-EXP=-1;  % -1 = EXP
-GGM=0;  % 0 = GGM
-GLM=1;  % 1 = GLM
-GRM=2;  % 2 = GRM
-LM=3;   % 3 = LM
-RICH=4; % 4 = Richards
-GOM=5; % 5 = Gompertz
+flag1 = GLM;         % Selected growth model: Logistic Model (GLM)
+model_name1 = 'GLM'; % Name of the selected model
+fixI0 = 1;           % Boolean: Fix the initial value to the first data point (true) or estimate it (false)
 
+% <============================================================================>
+% <====================== Forecasting Parameters =============================>
+% <============================================================================>
+% Parameters for forecasting analysis:
+% - getperformance: Boolean to enable/disable forecasting performance metrics
+% - forecastingperiod: Time horizon for forecasting (number of time units ahead)
 
-flag1=GLM; % Integer variable indicating the growth model that will be fit to the time-series data.
+getperformance = 1;    % Enable forecasting performance metrics (1 = yes, 0 = no)
+forecastingperiod = 4; % Forecast horizon: Number of time units ahead
 
-model_name1='GLM';  % A string variable indicating the name of the model.
+% <============================================================================>
+% <======= Parameters for Rolling Window Analysis ===========================>
+% <============================================================================>
+% Parameters for rolling window analysis:
+% - windowsize1: Size of the moving window
+% - tstart1: Start time point for rolling window analysis
+% - tend1: End time point for rolling window analysis
 
-fixI0=1; % Boolean variable indicating whether initial value in the time-series will be estimated or fix according to the first data point in the time series.
+windowsize1 = 10; % Size of the rolling window (e.g., 10 time units)
+tstart1 = 1;      % Start time point for rolling window analysis
+tend1 = 1;        % End time point for rolling window analysis
 
-% <==============================================================================>
-% <========================== Forecasting parameters ===================================>
-% <==============================================================================>
-
-getperformance=0; % Boolean variable indicating whether the user wishes to calculate forecasting performance metrics or not
-
-forecastingperiod=4; % Integer variable indicating the forecast horizon (number of time units ahead)
-
-% <==================================================================================>
-% <========================== Parameters of the rolling window analysis =========================>
-% <==================================================================================>
-
-windowsize1=10;  % Integer variable indicating the moving window size
-
-tstart1=1; % Integer variable indicating the time point for the start of rolling window analysis
-
-tend1=1;  %Integer variable indicating the time point for the end of the rolling window analysis
-
+end
