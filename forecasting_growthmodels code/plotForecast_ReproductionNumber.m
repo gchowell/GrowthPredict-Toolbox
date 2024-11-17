@@ -837,7 +837,7 @@ separator = '<==================================================================
 
 % Display options_fit.m header
 disp(separator);
-disp('**************************** options_fit.m ***********************************');
+disp('**************************** options_forecast.m *********************************');
 disp(separator);
 
 % Display Datasets properties
