@@ -247,7 +247,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     hold on
 
     line2=[param_r(1,2) 10;param_r(1,3) 10];
-    line1=plot(line2(:,1),line2(:,2),'r--')
+    line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
 
     xlabel('r')
@@ -263,7 +263,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     hold on
 
     line2=[param_p(1,2) 10;param_p(1,3) 10];
-    line1=plot(line2(:,1),line2(:,2),'r--')
+    line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
 
     xlabel('p')
@@ -280,7 +280,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     hold on
 
     line2=[param_a(1,2) 10;param_a(1,3) 10];
-    line1=plot(line2(:,1),line2(:,2),'r--')
+    line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
 
     xlabel('a')
@@ -296,7 +296,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     hold on
 
     line2=[param_K(1,2) 10;param_K(1,3) 10];
-    line1=plot(line2(:,1),line2(:,2),'r--')
+    line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
 
     xlabel('K')
@@ -338,20 +338,20 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     median1=median(forecast_model12,2);
 
-    line1=plot(timevect2,median1,'r-')
+    line1=plot(timevect2,median1,'r-');
     set(line1,'LineWidth',2)
 
     hold on
-    line1=plot(timevect2,LB1,'r--')
+    line1=plot(timevect2,LB1,'r--');
     set(line1,'LineWidth',2)
 
-    line1=plot(timevect2,UB1,'r--')
+    line1=plot(timevect2,UB1,'r--');
     set(line1,'LineWidth',2)
 
     % plot mean model fit
 
     color1=gray(8);
-    line1=plot(timevect1,fit_model1,'color',color1(6,:))
+    line1=plot(timevect1,fit_model1,'color',color1(6,:));
     set(line1,'LineWidth',1)
 
     % compute doubling times
@@ -405,18 +405,18 @@ for i=tstart1:1:tend1  %rolling window analysis
 
 
 
-    line1=plot(timevect2,median1,'r-')
+    line1=plot(timevect2,median1,'r-');
     set(line1,'LineWidth',2)
 
     % plot the data
 
-    line1=plot(timevect_all,data_all,'bo')
+    line1=plot(timevect_all,data_all,'bo');
     set(line1,'LineWidth',2)
 
     line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
     if forecastingperiod>0
-        line1=plot(line2(:,1),line2(:,2),'k--')
+        line1=plot(line2(:,1),line2(:,2),'k--');
         set(line1,'LineWidth',2)
     end
 
@@ -452,35 +452,35 @@ for i=tstart1:1:tend1  %rolling window analysis
 
         median1=median(forecast_model12,2);
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
 
         hold on
-        line1=plot(timevect2,LB1,'r--')
+        line1=plot(timevect2,LB1,'r--');
         set(line1,'LineWidth',2)
 
-        line1=plot(timevect2,UB1,'r--')
+        line1=plot(timevect2,UB1,'r--');
         set(line1,'LineWidth',2)
 
         % plot median model fit
 
         color1=gray(8);
-        line1=plot(timevect1,fit_model1,'color',color1(6,:))
+        line1=plot(timevect1,fit_model1,'color',color1(6,:));
         set(line1,'LineWidth',1)
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
 
 
         % plot the data
 
-        line1=plot(timevect_all,data_all,'bo')
+        line1=plot(timevect_all,data_all,'bo');
         set(line1,'LineWidth',2)
 
         line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
         if forecastingperiod>0
-            line1=plot(line2(:,1),line2(:,2),'k--')
+            line1=plot(line2(:,1),line2(:,2),'k--');
             set(line1,'LineWidth',2)
         end
 
@@ -540,7 +540,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
             subplot(2,2,1)
 
-            line1=plot(MAEFS_model1(:,1),MAEFS_model1(:,2),'k-o')
+            line1=plot(MAEFS_model1(:,1),MAEFS_model1(:,2),'k-o');
             set(line1,'LineWidth',4)
             hold on
 
@@ -552,7 +552,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
             subplot(2,2,2)
 
-            line1=plot(MSEFS_model1(:,1),MSEFS_model1(:,2),'k-o')
+            line1=plot(MSEFS_model1(:,1),MSEFS_model1(:,2),'k-o');
             set(line1,'LineWidth',4)
             hold on
 
@@ -564,7 +564,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
             subplot(2,2,3)
 
-            line1=plot(PIFS_model1(:,1),PIFS_model1(:,2),'k-o')
+            line1=plot(PIFS_model1(:,1),PIFS_model1(:,2),'k-o');
             set(line1,'LineWidth',4)
             hold on
 
@@ -577,7 +577,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
             subplot(2,2,4)
 
-            line1=plot(WISFS_model1(:,1),WISFS_model1(:,2),'k-o')
+            line1=plot(WISFS_model1(:,1),WISFS_model1(:,2),'k-o');
             set(line1,'LineWidth',4)
             hold on
 
@@ -673,7 +673,7 @@ if tend1>tstart1
     plot(tstart1:1:tend1,param_rs2(:,2),'b--')
     plot(tstart1:1:tend1,param_rs2(:,3),'b--')
 
-    line1=plot(tstart1:1:tend1,smooth(param_rs2(:,1),5),'k--')
+    line1=plot(tstart1:1:tend1,smooth(param_rs2(:,1),5),'k--');
     set(line1,'LineWidth',3)
 
 
@@ -688,7 +688,7 @@ if tend1>tstart1
     plot(tstart1:1:tend1,param_as2(:,2),'b--')
     plot(tstart1:1:tend1,param_as(:,3),'b--')
 
-    line1=plot(tstart1:1:tend1,smooth(param_as2(:,1),5),'k--')
+    line1=plot(tstart1:1:tend1,smooth(param_as2(:,1),5),'k--');
     set(line1,'LineWidth',3)
 
     ylabel('a')
@@ -702,7 +702,7 @@ if tend1>tstart1
     plot(tstart1:1:tend1,param_ps2(:,2),'b--')
     plot(tstart1:1:tend1,param_ps2(:,3),'b--')
 
-    line1=plot(tstart1:1:tend1,smooth(param_ps2(:,1),5),'k--')
+    line1=plot(tstart1:1:tend1,smooth(param_ps2(:,1),5),'k--');
     set(line1,'LineWidth',3)
 
 
@@ -717,7 +717,7 @@ if tend1>tstart1
     plot(tstart1:1:tend1,param_Ks2(:,2),'b--')
     plot(tstart1:1:tend1,param_Ks2(:,3),'b--')
 
-    line1=plot(tstart1:1:tend1,smooth(param_Ks2(:,1),5),'k--')
+    line1=plot(tstart1:1:tend1,smooth(param_Ks2(:,1),5),'k--');
     set(line1,'LineWidth',3)
 
     ylabel('K')

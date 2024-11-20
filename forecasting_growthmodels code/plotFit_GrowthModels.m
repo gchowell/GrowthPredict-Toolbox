@@ -206,7 +206,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_r(1,2) 10;param_r(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('r')
@@ -222,7 +222,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_p(1,2) 10;param_p(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('p')
@@ -239,7 +239,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_a(1,2) 10;param_a(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('a')
@@ -255,7 +255,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         hold on
 
         line2=[param_K(1,2) 10;param_K(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
 
         xlabel('K')
@@ -278,15 +278,15 @@ for i=tstart1:1:tend1 %rolling window analysis
 
         % plot 95% PI
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
         hold on
 
-        line1=plot(timevect2,LB1,'r--')
+        line1=plot(timevect2,LB1,'r--');
         set(line1,'LineWidth',2)
         hold on
 
-        line1=plot(timevect2,UB1,'r--')
+        line1=plot(timevect2,UB1,'r--');
         set(line1,'LineWidth',2)
 
         % plot model fit
@@ -353,13 +353,13 @@ for i=tstart1:1:tend1 %rolling window analysis
 
         % plot the data
 
-        line1=plot(timevect_all,data_all,'bo')
+        line1=plot(timevect_all,data_all,'bo');
         set(line1,'LineWidth',2)
 
         line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
         if forecastingperiod>0
-            line1=plot(line2(:,1),line2(:,2),'k--')
+            line1=plot(line2(:,1),line2(:,2),'k--');
             set(line1,'LineWidth',2)
         end
 
