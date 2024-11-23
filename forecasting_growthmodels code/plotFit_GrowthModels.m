@@ -382,6 +382,19 @@ for i=tstart1:1:tend1 %rolling window analysis
     T.Properties.VariableNames(1:5) = {'time','data','median','LB','UB'};
     writetable(T,strcat('./output/Fit-flag1-',num2str(flag1),'-tstart-',num2str(i),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
+    % Save quantiles of the model fit
+
+    % Label for quantile forecast
+    quantNamesRanked = {'Q_0.010', 'Q_0.025', 'Q_0.050', 'Q_0.100', 'Q_0.150', 'Q_0.200', 'Q_0.250', 'Q_0.300', 'Q_0.350', 'Q_0.400', 'Q_0.450', 'Q_0.500', 'Q_0.550', 'Q_0.600', 'Q_0.650', 'Q_0.700', 'Q_0.750', 'Q_0.800', 'Q_0.850', 'Q_0.900', 'Q_0.950', 'Q_0.975', 'Q_0.990'};
+
+    % Creating the combined quantile array and changing to table
+    combinedQuantiles = [quantilesc; quantilesf];
+    combinedQuantilesTable = array2table(combinedQuantiles, 'VariableNames', quantNamesRanked);
+
+    % Exporting the quantile forecast file
+    writetable(combinedQuantilesTable,strcat('./output/quantile-fit-flag1-',num2str(flag1),'-tstart-',num2str(i),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'));
+
+
     cc1=cc1+1;
 
 end
