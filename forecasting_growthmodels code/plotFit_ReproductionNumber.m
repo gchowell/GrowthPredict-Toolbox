@@ -199,7 +199,19 @@ for i=tstart1:1:tend1 %rolling window analysis
         close all
     end
 
-    load(strcat('./output/Forecast-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(i),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-0.mat'))
+    filename=strcat('./output/Forecast-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(i),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-0.mat');
+
+       %Check if the file exists
+    if exist(filename, 'file') == 2
+        % File exists, proceed to load
+        load(strcat('./output/Forecast-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(i),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-0.mat'))
+        disp('File loaded successfully.');
+    else
+        % File does not exist
+        disp(['Error: File "' filename '" does not exist.']);
+        continue
+    end
+
 
     % <======================================================================================>
     % <======================= Plot parameter distributions and model fit and forecast ========================>

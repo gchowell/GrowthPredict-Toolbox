@@ -205,7 +205,6 @@ if tstart1>tend1
  return
 end
 
-
 AICcs=[];
 
 for i=tstart1:1:tend1  %rolling window analysis
@@ -228,7 +227,40 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     % first data point cannot be zero
     if datac(1)==0
-        continue
+        % RMSECSS=[RMSECSS;NaN];
+        % MSECSS=[MSECSS;NaN];
+        % MAECSS=[MAECSS;NaN];
+        % PICSS=[PICSS;NaN];
+        % MISCSS=[MISCSS;NaN];
+        % WISCSS=[WISCSS;NaN];
+        % 
+        % AICcs=[AICcs;[i NaN NaN NaN NaN]];
+        % 
+        % param_rs=[param_rs;NaN NaN NaN];
+        % param_as=[param_as;NaN NaN NaN];
+        % param_ps=[param_ps;NaN NaN NaN];
+        % param_Ks=[param_Ks;NaN NaN NaN];
+        % param_I0s=[param_I0s;NaN NaN NaN];
+        % param_alphas=[param_alphas;NaN NaN NaN];
+        % param_ds=[param_ds;NaN NaN NaN];
+        % 
+        % if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean+alpha*mean^2;
+        % 
+        %     MCSES=[MCSES;NaN NaN NaN NaN NaN NaN NaN];
+        % 
+        % elseif method1==5
+        % 
+        %     MCSES=[MCSES;NaN NaN NaN NaN NaN NaN NaN];
+        % 
+        % else
+        % 
+        %     MCSES=[MCSES;NaN NaN NaN NaN NaN NaN NaN];
+        % 
+        % end
+
+        datac(1)=0.01;
+
+        %continue
     end
 
     I0=datac(1);
@@ -387,7 +419,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
         [WISC_model1,WISFS_model1]=computeWIS(data1,datalatest,forecast_model12,forecastingperiod)
 
-        % store metrics for calibration
+        % store metrics for calibration        
         RMSECSS=[RMSECSS;[RMSECS_model1(end,end)]];
         MSECSS=[MSECSS;[MSECS_model1(end,end)]];
         MAECSS=[MAECSS;[MAECS_model1(end,end)]];

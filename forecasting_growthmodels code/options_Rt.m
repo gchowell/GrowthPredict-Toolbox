@@ -11,8 +11,8 @@ type_GId1 = 1; % Type of generation interval distribution:
                % 2 = Exponential distribution (simpler, assumes memoryless property).
                % 3 = Delta distribution (fixed generation interval, no variability).
 
-mean_GI1 = 5 / 7; % Mean of the generation interval distribution (in time units, e.g., days).
+mean_GI1 = 4; % Mean of the generation interval distribution (in time units, e.g., days).
                   % Example: 5/7 corresponds to approximately 0.71 days.
 
-var_GI1 = (8 / 7)^2; % Variance of the generation interval distribution (in time units squared).
+var_GI1 = 8; % Variance of the generation interval distribution (in time units squared).
                      % Example: (8/7)^2 corresponds to approximately 1.31 days^2.
