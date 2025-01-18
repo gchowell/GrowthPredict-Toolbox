@@ -51,11 +51,10 @@ switch method1
 end
 
 
-rlb=mean(abs(data1(1:2,2)))/200;
-rub=max(abs(data1(1:2,2)))*5;
+rlb=median(abs(data1(1:2,2)))/200;
+rub=5*max(abs(data1(1:2,2)));
 
-
-Kmax=10000000000;
+Kmax=1000000000;
 
 if fixI0==1
 
@@ -70,11 +69,11 @@ if fixI0==1
             UB=[rub  1 1 0 I0 UBe];
 
         case 1 % GLM
-            LB=[rlb  0.01 1 20 I0 LBe];
+            LB=[0.001  0.01 1 1 I0 LBe];
             UB=[rub  1 1 Kmax I0 UBe];
 
         case 2 %GRM
-            LB=[rlb  0.01 0 20 I0 LBe];
+            LB=[rlb  0.01 0 1 I0 LBe];
             UB=[rub  1 10 Kmax I0 UBe];
 
         case 3 %Logistic
@@ -82,7 +81,7 @@ if fixI0==1
             UB=[rub  1 1 Kmax I0 UBe];
 
         case 4 % Richards
-            LB=[rlb  1 0 20 I0 LBe];
+            LB=[rlb  1 0 1 I0 LBe];
             UB=[rub  1 10 Kmax I0 UBe];
 
         case 5 % Gompertz
