@@ -4,31 +4,62 @@
 <p> <a href="https://www.nature.com/articles/s41598-024-51852-8" target="_blank">GrowthPredict Tutorial</a></p> 
 <p><a href="https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2&index=4&t=18s" target="_blank">Video Tutorial</a></p>
 
-<p> It carries out the following tasks: </p> 
-<ul>
-    <li>fitting models to time series data,</li>
-    <li>estimation of model parameters, Monte Carlo standard errors (MCSES) of the parameter estimates, doubling times, and reproduction numbers with quantified uncertainty,</li>
-    <li>plotting the best fit of the model and parameter estimates,</li>
-    <li>plotting forecasts from the best-fit model,</li>
-    <li>generates and plots performance metrics of the forecasts,</li>
-    <li>generates quantiles associated with the model fit and the forecast</li>
-    <li>conducts rolling window analyses of parameter estimates during specific time periods and window sizes</li>
-    
-</ul>
+## ✨ Features
 
-<p> Additional features include:</p>
+- **Fits a suite of phenomenological models**, including:
+  - Exponential Growth
+  - Generalized Growth Model (GGM)
+  - Gompertz Model
+  - Generalized Logistic Growth Model (GLM)
+  - Richards Model
+- **Flexible estimation methods**:
+  - Nonlinear Least Squares (LSQ)
+  - Maximum Likelihood Estimation (MLE) with support for **normal, Poisson, and negative binomial errors**
+- **Forecasting with uncertainty quantification** via **parametric bootstrapping**
+- **Epidemiological metrics calculation**, such as:
+  - Doubling time
+  - **Effective reproduction number (Rₜ)**
+- **Forecast evaluation tools**:
+  - Weighted Interval Score (WIS)
+  - Mean Absolute Error (MAE)
+  - Mean Squared Error (MSE)
+- **Rolling window analysis** for time-varying parameter estimation and forecasting
+- **High-quality visualizations** for:
+  - Model fit and forecast curves
+  - Prediction intervals
+  - Forecast evaluation metrics
 
-<ul>
-    <li>fitting models using different parameter estimation approaches (least-squares, maximum likelihood estimation),</li>
-    <li>fitting models using assuming different error structures (normal, Poisson, negative binomial),</li>
-    <li>user can select among different growth models including the generalized-growth model (GGM), generalized-logistic growth model (GLM), Gompertz model, Richards model, and the generalized Richards model (GRM),</li>
-    <li> User can conduct multiple fits of the model to the data through a rolling-window analysis </li>
-    
-</ul>
-    
-# Installation requirements
+## 📦 Installation
 
-The GrowthPredict toolbox requires a MATLAB installation.
+```bash
+git clone https://github.com/gchowell/GrowthPredict-Toolbox.git
+cd GrowthPredict-Toolbox/forecasting_growthmodels_code
+```
+
+In MATLAB, add the directory to your path:
+
+```matlab
+addpath(genpath(pwd))
+```
+
+Make sure you have two folders in your working directory:
+
+- `input` — **Store your data files here**
+- `output` — **Toolbox results will be saved here**
+
+## 📊 Usage
+
+1. **Prepare input data**:  
+   Create a `.txt` file with two columns:
+   - Column 1: Time index (e.g., 0, 1, 2, ...)
+   - Column 2: Observed incidence (e.g., case counts)
+   - If using **cumulative incidence**, filename must start with `cumulative`.
+
+2. **Configure settings**:  
+   Modify the following files to specify model and estimation options:
+   - `options_fit.m`
+   - `options_forecast.m`
+
 
 # Fitting the model to your data
 
@@ -72,6 +103,23 @@ After running <code>Run_Forecasting_GrowthModels.m</code>, you can use the toolb
 
 The function also outputs files with parameter estimates, the fit and forecast of the model, and the performance metrics for the calibration period and forecasting periods.
 
+## 📚 Tutorial & Examples
+
+For detailed examples and step-by-step tutorials:
+
+- 📄 **Tutorial Paper**:  
+  [GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories](https://www.nature.com/articles/s41598-024-51852-8)
+
+- 🎥 **Video Tutorial**:  
+  [YouTube Series on GrowthPredict Toolbox](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
+
+The tutorial showcases real-world applications using, for example, the 2022 U.S. monkeypox (mpox) epidemic dataset.
+
+## 📄 License
+
+This toolbox is licensed under the **GNU General Public License v3.0**.  
+See the [LICENSE](LICENSE) file for more details.
+
 # Publications
 
 <ul>
@@ -83,10 +131,3 @@ The function also outputs files with parameter estimates, the fit and forecast o
 <li> Bürger, R., Chowell, G., & Lara-Díıaz, L. Y. (2019). Comparative analysis of phenomenological growth models applied to epidemic outbreaks. Mathematical Biosciences and Engineering, 16(5), 4250-4273. </li>
 
 </ul>
-
-# Disclaimer
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.  
