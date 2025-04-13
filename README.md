@@ -1,8 +1,17 @@
 # GrowthPredict
 **GrowthPredict** is a **user-friendly MATLAB toolbox** for fitting and forecasting time-series trajectories using **phenomenological dynamic growth models based on ordinary differential equations (ODEs)**. It is especially useful for modeling **epidemic outbreaks and other processes governed by growth dynamics**.
  
-<p> <a href="https://www.nature.com/articles/s41598-024-51852-8" target="_blank">GrowthPredict Tutorial</a></p> 
-<p><a href="https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2&index=4&t=18s" target="_blank">Video Tutorial</a></p>
+## 📚 Tutorial & Examples
+
+For detailed examples and step-by-step tutorials:
+
+- 📄 **Tutorial Paper**:  
+  [GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories](https://www.nature.com/articles/s41598-024-51852-8)
+
+- 🎥 **Video Tutorial**:  
+  [YouTube Series on GrowthPredict Toolbox](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
+
+The tutorial showcases real-world applications using, for example, the 2022 U.S. monkeypox (mpox) epidemic dataset.
 
 ## ✨ Features
 
@@ -99,17 +108,6 @@ After running <code>Run_Forecasting_GrowthModels.m</code>, you can use the toolb
 
 The function also outputs files with parameter estimates, the fit and forecast of the model, and the performance metrics for the calibration period and forecasting periods.
 
-## 📚 Tutorial & Examples
-
-For detailed examples and step-by-step tutorials:
-
-- 📄 **Tutorial Paper**:  
-  [GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories](https://www.nature.com/articles/s41598-024-51852-8)
-
-- 🎥 **Video Tutorial**:  
-  [YouTube Series on GrowthPredict Toolbox](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
-
-The tutorial showcases real-world applications using, for example, the 2022 U.S. monkeypox (mpox) epidemic dataset.
 
 ## 📄 License
 
