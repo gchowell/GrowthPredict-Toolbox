@@ -1,5 +1,5 @@
 # GrowthPredict
-GrowthPredict is a user-friendly MATLAB toolbox designed for fitting and forecasting time-series trajectories using phenomenological dynamic growth models based on ordinary differential equations (ODEs). It is particularly useful for modeling processes such as epidemic outbreaks, where understanding growth dynamics is crucial.
+**GrowthPredict** is a **user-friendly MATLAB toolbox** for fitting and forecasting time-series trajectories using **phenomenological dynamic growth models based on ordinary differential equations (ODEs)**. It is especially useful for modeling **epidemic outbreaks and other processes governed by growth dynamics**.
  
 <p> <a href="https://www.nature.com/articles/s41598-024-51852-8" target="_blank">GrowthPredict Tutorial</a></p> 
 <p><a href="https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2&index=4&t=18s" target="_blank">Video Tutorial</a></p>
