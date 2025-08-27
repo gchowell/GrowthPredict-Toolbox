@@ -181,6 +181,7 @@ param_alphas=[];
 param_ds=[];
 
 MCSES=[];
+SCIs=[];
 
 RMSECSS=[];
 MSECSS=[];
@@ -640,7 +641,8 @@ end
 % <================= Save csv file with parameters from rolling window analysis ====================================>
 % <=============================================================================================>
 
-if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean+alpha*mean^2;
+
+if method1==3 || method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean+alpha*mean^2;
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end)];
     T = array2table(rollparams);
@@ -649,6 +651,11 @@ if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean
     rollparams=[(tstart1:1:tend1)' MCSES(:,1:6)];
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:7) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE','alpha MCSE'};
+
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:6)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:7) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI','alpha SCI'};
+    
 
 elseif method1==5
 
@@ -660,6 +667,10 @@ elseif method1==5
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:8) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE','alpha MCSE','d MCSE'};
 
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:7)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:8) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI','alpha SCI','d SCI'};
+
 else
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end)];
@@ -670,11 +681,19 @@ else
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:6) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE'};
 
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:5)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:6) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI'};
+
+
 end
 
 writetable(T,strcat('./output/parameters-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 writetable(T2,strcat('./output/MCSES-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
+
+writetable(T3,strcat('./output/SCIS-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
+
 
 % <========================================================================================>
 % <========================================================================================>

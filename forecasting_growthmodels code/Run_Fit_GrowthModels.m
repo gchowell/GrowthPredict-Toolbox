@@ -156,9 +156,9 @@ numparams=get_nparams(method1,dist1,flag1,fixI0);
 numparams
 windowsize1
 
-if numparams>=windowsize1
+if numparams>windowsize1
 
-    error("Number of estimated parameters should be smaller than the calibration period. Consider increasing the length of the calibration period.")
+    error("Number of estimated parameters should not exceed the length of the calibration period. Consider increasing the length of the calibration period.")
 
 end
 
@@ -175,6 +175,7 @@ param_alphas=[];
 param_ds=[];
 
 MCSES=[];
+SCIs=[];
 
 RMSECSS=[];
 MSECSS=[];
@@ -365,7 +366,7 @@ for i=tstart1:1:tend1  %rolling window analysis
         params0=P_model1d;
        
 
-        [P_model1,residual_model1 fitcurve_model1 forecastcurve_model1 timevect2]=fit_model(data1,params0,fixI0,2,DT,flag1,forecastingperiod);
+        [P_model1,residual_model1 fitcurve_model1 forecastcurve_model1 timevect2]=fit_model(data1,params0,fixI0,10,DT,flag1,forecastingperiod);
 
         fit_model1=[fit_model1 fitcurve_model1];
 
@@ -474,6 +475,8 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     MCSE=[std(Phatss_model1(:,1))/sqrt(M) std(Phatss_model1(:,2))/sqrt(M) std(Phatss_model1(:,3))/sqrt(M) std(Phatss_model1(:,4))/sqrt(M) std(Phatss_model1(:,5))/sqrt(M) std(Phatss_model1(:,6))/sqrt(M) std(Phatss_model1(:,7))/sqrt(M)];
 
+    SCI=[log10(param_r(3)/param_r(2)) log10(param_p(3)/param_p(2)) log10(param_a(3)/param_a(2)) log10(param_K(3)/param_K(2)) log10(param_I0(3)/param_I0(2)) log10(param_alpha(3)/param_alpha(2)) log10(param_d(3)/param_d(2))];
+
     param_rs=[param_rs; [param_r]];
     param_as=[param_as; [param_a]];
     param_ps=[param_ps; [param_p]];
@@ -483,6 +486,8 @@ for i=tstart1:1:tend1  %rolling window analysis
     param_ds=[param_ds; [param_d]];
 
     MCSES=[MCSES;MCSE];
+
+    SCIs=[SCIs;SCI];
 
     cad1=strcat('r=',num2str(param_r(end,1),2),' (95% CI:',num2str(param_r(end,2),2),',',num2str(param_r(end,3),2),')')
     cad2=strcat('p=',num2str(param_p(end,1),2),' (95% CI:',num2str(param_p(end,2),2),',',num2str(param_p(end,3),2),')')
@@ -683,7 +688,7 @@ writetable(T,strcat('./output/performance-calibration-flag1-',num2str(flag1),'-f
 % <================= Save csv file with parameters from rolling window analysis ====================================>
 % <=============================================================================================>
 
-if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean+alpha*mean^2;
+if method1==3 || method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean+alpha*mean^2;
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end)];
     T = array2table(rollparams);
@@ -693,6 +698,10 @@ if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:7) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE','alpha MCSE'};
 
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:6)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:7) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI','alpha SCI'};
+    
 
 elseif method1==5
 
@@ -704,6 +713,9 @@ elseif method1==5
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:8) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE','alpha MCSE','d MCSE'};
 
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:7)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:8) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI','alpha SCI','d SCI'};
 
 else
 
@@ -715,12 +727,18 @@ else
     T2 = array2table(rollparams);
     T2.Properties.VariableNames(1:6) = {'time','r MCSE','p MCSE','a MCSE','K0 MCSE','I0 MCSE'};
 
+    rollparams=[(tstart1:1:tend1)' SCIs(:,1:5)];
+    T3 = array2table(rollparams);
+    T3.Properties.VariableNames(1:6) = {'time','r SCI','p SCI','a SCI','K0 SCI','I0 SCI'};
+
+
 end
 
 writetable(T,strcat('./output/parameters-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 writetable(T2,strcat('./output/MCSES-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
+writetable(T3,strcat('./output/SCIS-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 
 
