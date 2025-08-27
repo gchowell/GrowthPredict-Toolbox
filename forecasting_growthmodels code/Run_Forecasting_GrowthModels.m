@@ -436,6 +436,8 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     MCSE=[std(Phatss_model1(:,1))/sqrt(M) std(Phatss_model1(:,2))/sqrt(M) std(Phatss_model1(:,3))/sqrt(M) std(Phatss_model1(:,4))/sqrt(M) std(Phatss_model1(:,5))/sqrt(M) std(Phatss_model1(:,6))/sqrt(M) std(Phatss_model1(:,7))/sqrt(M)];
 
+    SCI=[log10(param_r(3)/param_r(2)) log10(param_p(3)/param_p(2)) log10(param_a(3)/param_a(2)) log10(param_K(3)/param_K(2)) log10(param_I0(3)/param_I0(2)) log10(param_alpha(3)/param_alpha(2)) log10(param_d(3)/param_d(2))];
+
     param_rs=[param_rs; param_r];
     param_as=[param_as; param_a];
     param_ps=[param_ps; param_p];
@@ -446,6 +448,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
 
     MCSES=[MCSES;MCSE];
+    SCIs=[SCIs;SCI];
 
     cad1=strcat('r=',num2str(param_r(end,1),2),' (95% CI:',num2str(param_r(end,2),2),',',num2str(param_r(end,3),2),')')
     cad2=strcat('p=',num2str(param_p(end,1),2),' (95% CI:',num2str(param_p(end,2),2),',',num2str(param_p(end,3),2),')')
