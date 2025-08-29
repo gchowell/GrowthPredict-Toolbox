@@ -1,7 +1,60 @@
+
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
 % <============================================================================>
 function [cadfilename1, caddisease, datatype, dist1, numstartpoints, B, flag1, model_name1, fixI0, windowsize1, tstart1, tend1] = options_fit
+
+% OPTIONS_FIT  GrowthPredict options for fitting single growth models
+%
+% Overview
+%   Returns all configuration needed to calibrate a chosen growth model to a
+%   univariate time series and quantify uncertainty (via parametric bootstrap).
+%
+% Usage
+%   [cadfilename1, caddisease, datatype, dist1, numstartpoints, B, ...
+%    flag1, model_name1, fixI0, windowsize1, tstart1, tend1] = options_fit;
+%
+% Returns
+%   cadfilename1    char     Base name of the input file in ./input (expects '<cadfilename1>.txt')
+%   caddisease      char     Disease/subject label for outputs (e.g., 'Mpox')
+%   datatype        char     Data tag (e.g., 'cases' | 'deaths' | 'hospitalizations')
+%   dist1           int      Error model (see “Estimation & error models” below)
+%   numstartpoints  int      MultiStart initial points for global search
+%   B               int      Bootstrap replicates for parameter uncertainty
+%   flag1           int      Growth-model code (see “Growth model choices”)
+%   model_name1     char     Human-readable model name matching flag1 (e.g., 'GLM')
+%   fixI0           logical  1=fix initial observed value to first datum; 0=estimate it
+%   windowsize1     int      Rolling-window length (time steps)
+%   tstart1         int      Start index of the first rolling window
+%   tend1           int      End index of the first rolling window
+%
+% Input data (./input)
+%   Text file '<cadfilename1>.txt' with two columns, NO header:
+%     Col 1: time index  (0,1,2,...)
+%     Col 2: observed incidence (nonnegative)
+%   If the series is cumulative, the filename MUST start with 'cumulative-'.
+%
+% Estimation & error models
+%   The global 'method1' selects the estimator; 'dist1' sets/weights the observation model.
+%     method1 = 0  Nonlinear least squares (LSQ)
+%         choose dist1 ∈ {0,1,2}:
+%           0 = Normal (homoscedastic LSQ)
+%           1 = Poisson-like weighting (var ≈ mean; LSQ variant)
+%           2 = NegBin-like weighting with var = factor1·mean (factor1 estimated empirically)
+%     method1 = 1  MLE Poisson                          → dist1 := 1 (automatic)
+%     method1 = 3  MLE NegBin: var = mean + α·mean      → dist1 := 3 (automatic)
+%     method1 = 4  MLE NegBin: var = mean + α·mean^2    → dist1 := 4 (automatic)
+%     method1 = 5  MLE NegBin: var = mean + α·mean^d    → dist1 := 5 (automatic)
+%
+% Growth model choices (flag1)
+%   EXP = -1 (Exponential), GGM = 0 (Generalized Growth), GLM = 1 (Logistic),
+%   GRM = 2 (Generalized Richards), LM = 3 (Linear), RICH = 4 (Richards), GOM = 5 (Gompertz).
+%
+% Notes
+%   • MultiStart (numstartpoints) helps avoid local minima for nonlinear models.
+%   • Set fixI0=1 to anchor the initial observed state to the first data point.
+%   • Rolling windows use indices in the time index, not calendar dates.
+
 
 % <============================================================================>
 % <=================== Declare Global Variables ==============================>
@@ -57,7 +110,7 @@ end
 
 % Optimization settings:
 numstartpoints = 10; % Number of initial guesses for global optimization (Multistart).
-B = 300;             % Number of bootstrap realizations for parameter uncertainty characterization.
+B = 100;             % Number of bootstrap realizations for parameter uncertainty characterization.
 
 % <============================================================================>
 % <========================== Growth Model ===================================>
@@ -86,7 +139,7 @@ fixI0 = 1;           % Boolean: Fix initial value to the first data point (true)
 % - tend1: Time point where rolling window analysis ends.
 
 windowsize1 = 20; % Size of the rolling window (e.g., 20 days).
-tstart1 = 37;     % Start time point for rolling window analysis.
-tend1 = 37;       % End time point for rolling window analysis.
+tstart1 = 1;     % Start time point for rolling window analysis.
+tend1 = 1;       % End time point for rolling window analysis.
 
 end

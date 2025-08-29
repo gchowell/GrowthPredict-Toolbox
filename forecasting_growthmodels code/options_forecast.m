@@ -1,8 +1,64 @@
+
+% options_forecast.m — GrowthPredict
+% Put this file in your working directory (same level as ./input and ./output).
+% The GrowthPredict user function Run_Forecasting_GrowthModels.m reads these
+% variables from the workspace.
+
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
 % <============================================================================>
 
 function [cadfilename1, caddisease, datatype, dist1, numstartpoints, B, flag1, model_name1, fixI0, getperformance, forecastingperiod, windowsize1, tstart1, tend1] = options_forecast
+
+% OPTIONS_FORECAST  GrowthPredict options for forecasting with growth models
+%
+% Overview
+%   Returns configuration to (i) calibrate the chosen growth model on rolling
+%   windows and (ii) generate out-of-sample forecasts with quantified uncertainty.
+%
+% Usage
+%   [cadfilename1, caddisease, datatype, dist1, numstartpoints, B, ...
+%    flag1, model_name1, fixI0, getperformance, forecastingperiod, ...
+%    windowsize1, tstart1, tend1] = options_forecast;
+%
+% Returns
+%   cadfilename1      char     Base name of the input file in ./input ('<cadfilename1>.txt')
+%   caddisease        char     Disease/subject label for outputs
+%   datatype          char     Data tag (e.g., 'cases' | 'deaths' | 'hospitalizations')
+%   dist1             int      Error model (see mapping below)
+%   numstartpoints    int      MultiStart initial points for global search
+%   B                 int      Bootstrap replicates for uncertainty
+%   flag1             int      Growth-model code (see “Growth model choices”)
+%   model_name1       char     Human-readable model name matching flag1
+%   fixI0             logical  1=fix initial observed value; 0=estimate it
+%   getperformance    logical  1=compute forecast performance metrics; 0=skip
+%   forecastingperiod int      Forecast horizon (steps ahead)
+%   windowsize1       int      Rolling-window length (time steps)
+%   tstart1           int      Start index of the first rolling window
+%   tend1             int      End index of the first rolling window
+%
+% Input data (./input)
+%   Text file '<cadfilename1>.txt' with two columns, NO header:
+%     Col 1: time index  (0,1,2,...)
+%     Col 2: observed incidence (nonnegative)
+%   If the series is cumulative, the filename MUST start with 'cumulative-'.
+%
+% Estimation & error models
+%   The global 'method1' selects the estimator; 'dist1' sets/weights the observation model.
+%     method1 = 0  LSQ with dist1 ∈ {0,1,2} as weighting (Normal / Poisson-like / NegBin-like)
+%     method1 = 1  MLE Poisson                          → dist1 := 1 (automatic)
+%     method1 = 3  MLE NegBin: var = mean + α·mean      → dist1 := 3 (automatic)
+%     method1 = 4  MLE NegBin: var = mean + α·mean^2    → dist1 := 4 (automatic)
+%     method1 = 5  MLE NegBin: var = mean + α·mean^d    → dist1 := 5 (automatic)
+%
+% Growth model choices (flag1)
+%   EXP=-1, GGM=0, GLM=1, GRM=2, LM=3, RICH=4, GOM=5.  Set model_name1 accordingly (e.g., 'GLM').
+%
+% Notes
+%   • Choose forecastingperiod to match your application (e.g., 4 weeks if weekly data).
+%   • getperformance=1 writes forecast accuracy metrics to ./output (if implemented).
+%   • Keep file/disease labels ASCII if you need cross-platform filename compatibility.
+
 
 % <============================================================================>
 % <=================== Declare Global Variables ==============================>
@@ -57,7 +113,7 @@ end
 
 % Optimization settings:
 numstartpoints = 10; % Number of initial guesses for global optimization (Multistart)
-B = 300;             % Number of bootstrap realizations for parameter uncertainty characterization
+B = 100;             % Number of bootstrap realizations for parameter uncertainty characterization
 
 % <============================================================================>
 % <========================== Growth Model ===================================>
