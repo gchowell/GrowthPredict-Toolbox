@@ -71,6 +71,7 @@ Make sure you have two folders in your working directory:
 
 
 ## Options files configurations
+Quick reference for configuring GrowthPredict runs — edit the settings in options_fit.m, options_forecast.m, and options_Rt.m; these values are consumed by the toolbox’s fitting, forecasting, and Rt scripts.
 
 | Setting                            | Where                                 | What it controls                                                                                                                                                                                                         | Typical values                                                                                                                                  |
 | ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
