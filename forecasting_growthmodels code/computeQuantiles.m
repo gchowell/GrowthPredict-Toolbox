@@ -1,4 +1,5 @@
-function [quantilesc1,quantilesf1, alphaquantiles]=computeWIS(data1,curvesforecasts2,forecastingperiod)
+function [quantilesc1,quantilesf1, alphaquantiles]=computeQuantiles(data1,curvesforecasts2,forecastingperiod)
+
 
 %What is Alpha quantile?
 %More precisely, an α-quantile is a real number Xα such that the random variable is less or equal to it with probability at least α, and greater or equal to it with probability at least (1–α). It is not possible to require equality because the probability of the value Xα may be positive.May 18, 2011

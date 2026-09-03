@@ -1,6 +1,6 @@
-function [tds,C0data,curve,doublingtimes]=getOutbreakDoublingTime(curve,DT,print1)
+function [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(curve,DT,print1)
 
-dt1=0.01;
+dt1=0.01; 
 
 data=[(0:1:length(curve)-1)' curve];
 
@@ -95,6 +95,7 @@ end
 
 
 if length(tds(:,1))<=1 % redo realization
+    doublingtimes=[];
     return
 end
 

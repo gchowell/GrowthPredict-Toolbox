@@ -1,4 +1,4 @@
-function objfunction=plotModifiedLogisticGrowth1(z)
+function objfunction=plotModifiedLogisticGrowthMethods1(z)
 
 global flag1 method1 timevect ydata
 

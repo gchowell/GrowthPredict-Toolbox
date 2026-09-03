@@ -1,4 +1,4 @@
-function [param_R,param_doubling,seq_doublingtimes]=plotForecast_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass)
+function [param_R,param_doubling,seq_doublingtimes]=plotForecast_ReproductionNumber(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>

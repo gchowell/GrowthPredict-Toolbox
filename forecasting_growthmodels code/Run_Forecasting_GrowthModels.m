@@ -1,4 +1,4 @@
-function   [AICcs,forecast_model1]=Run_Fit_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass)
+function   [AICcs,forecast_model1]=Run_Forecasting_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
@@ -254,7 +254,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     params0=initialParams(datac,flag1);
 
 
-    [P_model1d,residual_model1, fitcurve_model1d, forecastcurve_model1, timevect2, initialguess,fval]=fit_model(data1,params0,1,numstartpoints,DT,flag1,0);
+    [P_model1d,residual_model1, fitcurve_model1d, forecastcurve_model1, timevect2, initialguess,fval]=fit_model(data1,params0,fixI0,numstartpoints,DT,flag1,0);
 
 
     %plot(timevect1,data1(:,2),'ko')
@@ -367,7 +367,8 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     end %end bootstrapping loop
 
-    data1=[timevect1 data1(:,2)];
+    % Restore the original observed calibration dataset
+    data1 = [data(t_window,1) datac];
 
     datalatest=data(i:end,1:2);
 
@@ -606,6 +607,9 @@ for i=tstart1:1:tend1  %rolling window analysis
     save(strcat('./output/Forecast-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(i),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-',num2str(forecastingperiod),'.mat'),'-mat')
 
 end % rolling window analysis
+
+data1 = [timevect1 datac];
+
 
 %save model parameters from tstart1 to tend1
 save(strcat('./output/parameters-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-',num2str(forecastingperiod),'.mat'), 'param_rs', 'param_as', 'param_ps', 'param_Ks', 'param_I0s', 'param_alphas', 'param_ds','-mat')

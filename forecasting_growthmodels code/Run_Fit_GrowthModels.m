@@ -360,13 +360,14 @@ for i=tstart1:1:tend1  %rolling window analysis
         f_model1_sim=AddErrorStructure(cumsum(fitcurve_model1d),1,dist1,factor1,d);
 
         % Fit model1 to bootstrap data
-        data1=[timevect1 f_model1_sim];
+        
+        data1=[data(t_window,1) f_model1_sim];
 
         %params0=initialParams(data1(:,2),flag1);
         params0=P_model1d;
        
 
-        [P_model1,residual_model1 fitcurve_model1 forecastcurve_model1 timevect2]=fit_model(data1,params0,fixI0,10,DT,flag1,forecastingperiod);
+        [P_model1,residual_model1 fitcurve_model1 forecastcurve_model1 timevect2]=fit_model(data1,params0,fixI0,2,DT,flag1,forecastingperiod);
 
         fit_model1=[fit_model1 fitcurve_model1];
 
@@ -405,8 +406,8 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     end %end bootstrapping loop
 
-
-    data1=[timevect1 data1(:,2)];
+    % Restore the original observed calibration dataset
+    data1 = [data(t_window,1) datac];
 
     datalatest=data(i:end,1:2);
 
