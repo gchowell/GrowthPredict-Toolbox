@@ -50,6 +50,20 @@ elseif method1==5
 
 end
 
+if n <= numparams + 1
+
+    AICc = Inf;
+    part1 = NaN;
+    part2 = Inf;
+
+    warning('GrowthPredict:getAICc:InsufficientSample', ...
+        ['AICc is not defined for n=%g and k=%g; ' ...
+        'returning Inf (requires n>k+1).'], ...
+        n,numparams);
+
+    return
+end
+
 
 switch method1
     
