@@ -276,7 +276,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
         binsize1=7;
 
-        [ratios,~]=getMeanVarianceRatio(data1,binsize1,2);
+        [ratios,~] = getMeanVarianceRatio(data1(:,2), binsize1, 2);
 
         index1=find(ratios(:,1)>0);
 
@@ -353,7 +353,7 @@ for i=tstart1:1:tend1  %rolling window analysis
 
         forecast_model1=[forecast_model1 forecastcurve_model1];
 
-        if method1==0 & dist1==0
+        if method1==0
 
             forecast_model12=[forecast_model12 AddErrorStructure(cumsum(forecastcurve_model1),20,dist1,factor1,0)];
 

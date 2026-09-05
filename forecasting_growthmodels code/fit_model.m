@@ -50,7 +50,6 @@ switch method1
 
 end
 
-
 rlb=median(abs(data1(1:2,2)))/200;
 rub=5*max(abs(data1(1:2,2)));
 
@@ -180,9 +179,13 @@ ms = MultiStart('Display','off');
 %pts = z;
 tpoints = CustomStartPointSet(z);
 
+maxAttempts=3; % Initial attempt plus at most two retries.
+attempt=0;
 flagg=-1;
 
-while flagg<0
+while flagg<0 && attempt<maxAttempts
+
+    attempt=attempt+1;
 
     initialguess=[];
 
@@ -207,6 +210,12 @@ while flagg<0
 
     [P,fval,flagg,outpt,allmins] = run(ms,problem,allpts);
 
+end
+
+if flagg<0
+    error('GrowthPredict:fit_model:MaxAttemptsReached', ...
+        'Fit failed after %d attempts (last exit flag: %g).', ...
+        attempt,flagg);
 end
 
 % ydata
