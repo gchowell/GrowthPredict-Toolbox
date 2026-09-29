@@ -1,165 +1,340 @@
 # GrowthPredict
-**GrowthPredict** is a **user-friendly MATLAB toolbox** for fitting and forecasting time-series trajectories using **phenomenological dynamic growth models based on ordinary differential equations (ODEs)**. It is especially useful for modeling **epidemic outbreaks and other processes governed by growth dynamics**.
- 
-## 📚 Tutorial & Examples
 
-For detailed examples and step-by-step tutorials:
+**A MATLAB toolbox for fitting and forecasting epidemic growth trajectories with quantified uncertainty.**
 
-- 📄 **Tutorial Paper**:  
-  [GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories](https://www.nature.com/articles/s41598-024-51852-8)
+GrowthPredict brings phenomenological growth models, parameter estimation, parametric bootstrapping, and forecast evaluation into one workflow. It is designed for researchers, students, and instructors working with epidemic incidence curves and other time series that can be represented by growth models based on ordinary differential equations (ODEs).
 
-- 🎥 **Video Tutorial**:  
-  [YouTube Series on GrowthPredict Toolbox](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
+Fit a selected model to a calibration window, examine parameter uncertainty, and generate short-term forecasts. Repeat the analysis across rolling windows to study how model estimates and forecast performance change as observations accumulate. The toolbox also includes reproduction-number and doubling-time routines; review the [implementation notes](#implementation-notes-and-limitations) before interpreting these diagnostics.
 
-The tutorial showcases real-world applications using, for example, the 2022 U.S. monkeypox (mpox) epidemic dataset.
+[Quick start](#quick-start) · [Tutorial paper](https://doi.org/10.1038/s41598-024-51852-8) · [Video tutorials](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2) · [Citation](#citation-and-tutorials)
 
-## ✨ Features
+## Contents
 
-- **Fits a suite of phenomenological models**, including:
-  - Exponential Growth
-  - Generalized Growth Model (GGM)
-  - Gompertz Model
-  - Generalized Logistic Growth Model (GLM)
-  - Richards Model
-- **Flexible estimation methods**:
-  - Nonlinear Least Squares (LSQ)
-  - Maximum Likelihood Estimation (MLE) with support for **normal, Poisson, and negative binomial errors**
-- **Forecasting with uncertainty quantification** via **parametric bootstrapping**
-- **Epidemiological metrics calculation**, such as:
-  - Doubling time
-  - **Effective reproduction number (Rₜ)**
-- **Forecast evaluation tools**:
-  - Weighted Interval Score (WIS)
-  - Mean Absolute Error (MAE)
-  - Mean Squared Error (MSE)
-- **Rolling window analysis** for time-varying parameter estimation and forecasting
-- **High-quality visualizations** for:
-  - Model fit and forecast curves
-  - Prediction intervals
-  - Forecast evaluation metrics
+- [Requirements and installation](#requirements-and-installation)
+- [Quick start](#quick-start) and [input data](#input-data)
+- [Growth models](#growth-models) and [configuration](#configuration)
+- [Rolling windows and evaluation](#rolling-windows-and-evaluation)
+- [Outputs](#outputs) and [epidemiological diagnostics](#epidemiological-diagnostics)
+- [Implementation notes](#implementation-notes-and-limitations), [reproducibility](#reproducibility), and [troubleshooting](#troubleshooting)
+- [Citation and tutorials](#citation-and-tutorials) · [Contributing](#contributing) · [License](#license)
 
-## 📦 Installation
+## Requirements and installation
+
+### MATLAB dependencies
+
+The current implementation uses MATLAB together with the following products:
+
+| Product | Used for |
+| --- | --- |
+| [Optimization Toolbox](https://www.mathworks.com/help/optim/ug/fmincon.html) | Constrained parameter estimation with `fmincon`. |
+| [Global Optimization Toolbox](https://www.mathworks.com/help/gads/multistart.html) | `MultiStart`, optimization-problem construction, and starting-point sets. |
+| [Statistics and Machine Learning Toolbox](https://www.mathworks.com/help/stats/nbinrnd.html) | Distribution functions and random draws for uncertainty calculations. |
+
+A minimum supported MATLAB release and an Octave-compatible workflow have not been established for this documentation. Record your MATLAB release and installed toolbox versions with `ver` when reporting results or issues.
+
+### Get the code
+
+Clone the repository in a terminal:
 
 ```bash
 git clone https://github.com/gchowell/GrowthPredict-Toolbox.git
-cd GrowthPredict-Toolbox/forecasting_growthmodels_code
 ```
 
-In MATLAB, add the directory to your path:
+Alternatively, use **Code → Download ZIP** on GitHub and extract the archive.
+
+In MATLAB, set the **Current Folder** to the cloned or extracted repository root, then run:
 
 ```matlab
-addpath(genpath(pwd))
+cd(fullfile(pwd, 'forecasting_growthmodels code'))
+addpath(pwd)
+
+if ~isfolder('input'),  mkdir('input');  end
+if ~isfolder('output'), mkdir('output'); end
 ```
 
-Make sure you have two folders in your working directory:
+**The code-folder name contains a space:** `forecasting_growthmodels code`, not `forecasting_growthmodels_code`. Run the workflows from this folder because input and output paths are relative to the current working directory.
 
-- `input` — **Store your data files here**
-- `output` — **Toolbox results will be saved here**
+The repository also contains root-level copies of some functions. Use the implementations inside the code folder consistently; check MATLAB's function resolution with:
 
-## 📊 Usage
+```matlab
+which Run_Forecasting_GrowthModels -all
+which plotForecast_GrowthModels -all
+which computeQuantiles -all
+```
 
-1. **Prepare input data**:  
-   Create a `.txt` file with two columns:
-   - Column 1: Time index (e.g., 0, 1, 2, ...)
-   - Column 2: Observed incidence (e.g., case counts)
-   - If using **cumulative incidence**, filename must start with `cumulative`.
+The first result for each command should point to the intended code folder.
 
-2. **Configure settings**:  
-   Modify the following files to specify model and estimation options:
-   - `options_fit.m`
-   - `options_forecast.m`
+## Quick start
 
+The bundled example is [`input/Most_Recent_Timeseries_US-CDC.txt`](forecasting_growthmodels%20code/input/Most_Recent_Timeseries_US-CDC.txt), used for the U.S. mpox example. The following workflow fits the first 20 observations and then evaluates a four-step forecast against subsequent observations in the file.
 
-## Options files configurations
-Quick reference for configuring GrowthPredict runs — edit the settings in options_fit.m, options_forecast.m, and options_Rt.m; these values are consumed by the toolbox’s fitting, forecasting, and Rt scripts.
+### 1. Configure the example
 
-| Setting                            | Where                                 | What it controls                                                                                                                                                                                                         | Typical values                                                                                                                                  |
-| ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cadfilename1`                     | `options_fit.m`, `options_forecast.m` | **Base name** of the input time series in `./input` (expects `<cadfilename1>.txt`, two columns, **no header**). If the series is cumulative, the filename must start with `cumulative-`.                                 | e.g., `Most_Recent_Timeseries_US-CDC`                                                                                                           |
-| `caddisease`                       | `options_fit.m`, `options_forecast.m` | Disease/subject label used in outputs/filenames                                                                                                                                                                          | e.g., `Mpox`                                                                                                                                    |
-| `datatype`                         | `options_fit.m`, `options_forecast.m` | Data type tag                                                                                                                                                                                                            | `cases`, `deaths`, `hospitalizations`, …                                                                                                        |
-| `method1` / `dist1`                | **global** in options files / both    | Estimator & observation/error model. `method1=0` (LSQ) uses `dist1∈{0,1,2}` as weighting (Normal / Poisson-like / NegBin-like). `method1=1,3,4,5` auto-sets `dist1` to 1,3,4,5 respectively (Poisson / NegBin variants). | `method1`: `0`=LSQ, `1`=MLE Poisson, `3/4/5`=MLE NegBin; `dist1`: `0`=Normal, `1`=Poisson, `2`=NegBin (LSQ-like), `3/4/5`=NegBin (MLE variants) |
-| `numstartpoints`                   | `options_fit.m`, `options_forecast.m` | MultiStart initial points for global optimization                                                                                                                                                                        | e.g., `10`                                                                                                                                      |
-| `B`                                | `options_fit.m`, `options_forecast.m` | Bootstrap replicates for parameter/forecast uncertainty                                                                                                                                                                  | e.g., `100`                                                                                                                                     |
-| `flag1` / `model_name1`            | `options_fit.m`, `options_forecast.m` | Growth model choice and its name (must correspond)                                                                                                                                                                       | `flag1`: `-1`=EXP, `0`=GGM, `1`=GLM, `2`=GRM, `3`=LM, `4`=RICH, `5`=GOM; `model_name1`: e.g., `GLM`                                             |
-| `fixI0`                            | `options_fit.m`, `options_forecast.m` | Fix initial observed value to first datum (`1`) or estimate it (`0`)                                                                                                                                                     | `0` or `1` (often `1`)                                                                                                                          |
-| `windowsize1`                      | `options_fit.m`, `options_forecast.m` | Rolling-window length (time steps)                                                                                                                                                                                       | Fit: e.g., `20`; Forecast: e.g., `10`                                                                                                           |
-| `tstart1`, `tend1`                 | `options_fit.m`, `options_forecast.m` | Start/end indices of the first rolling window                                                                                                                                                                            | e.g., `1`, `1`                                                                                                                                  |
-| `getperformance`                   | `options_forecast.m`                  | Compute forecast performance metrics                                                                                                                                                                                     | `0` or `1` (often `1`)                                                                                                                          |
-| `forecastingperiod`                | `options_forecast.m`                  | Forecast horizon (steps ahead)                                                                                                                                                                                           | e.g., `4`                                                                                                                                       |
-| `type_GId1`, `mean_GI1`, `var_GI1` | `options_Rt.m`                        | Generation-interval (GI) family & parameters for Rt (**same time units as your data/time step**)                                                                                                                         | `type_GId1`: `1`=Gamma, `2`=Exponential, `3`=Delta; e.g., `mean_GI1 = 5/7`, `var_GI1 = (8/7)^2`                                                 |
+Open [`options_fit.m`](forecasting_growthmodels%20code/options_fit.m) and [`options_forecast.m`](forecasting_growthmodels%20code/options_forecast.m). Check the following assignments **inside both functions**, preserving their existing function definitions and estimator-selection logic:
 
+```matlab
+cadfilename1 = 'Most_Recent_Timeseries_US-CDC';  % No .txt extension needed
+caddisease = 'Mpox';
+datatype = 'cases';
 
-# Fitting the model to your data
+method1 = 0;          % Unweighted nonlinear least squares
+dist1 = 0;            % Gaussian bootstrap/predictive noise
+numstartpoints = 10;  % Random starts for the original-data fit
+B = 100;              % Bootstrap datasets
 
-To use the toolbox to fit a model to your data, you just need to:
+flag1 = 1;            % Generalized logistic growth model
+model_name1 = 'GLM';
+fixI0 = 1;            % Fix the initial state to the first observation
+```
 
-<ul>
-    <li>define the model parameter values and time series parameters by editing <code>options_fit.m</code> </li>
-    <li>run the function <code>Run_Fit_GrowthModels.m</code> </li>
-</ul>
-  
-# Plotting the best model fit and parameter estimates
+Also set `getperformance = 1` in `options_forecast.m` for this retrospective example.
 
-After fitting the model to your data using the function <code>Run_Fit_GrowthModels.m</code>, you can use the toolbox to plot the best model fit and parameter estimates as follows:
+These are demonstration settings, not universal recommendations. In particular, Gaussian draws can be negative; see the [uncertainty limitations](#implementation-notes-and-limitations). Assess the stability of uncertainty summaries before selecting `B` for a scientific analysis.
 
-<ul>
-    <li>run the function <code>plotFit_GrowthModels.m</code> </li>
-</ul>
+### 2. Fit and plot
 
-The function also outputs files with parameter estimates, the best fit of the model, and the performance metrics for the calibration period.
+```matlab
+rng(1, 'twister');
+Run_Fit_GrowthModels(1, 1, 20);
+plotFit_GrowthModels(1, 1, 20);
+```
 
-# Generating forecasts
+The arguments specify the first window-start row, last window-start row, and number of calibration observations. Here, equal start and end indices request one window.
 
-To use the toolbox to fit a model to your data and generate a forecast, you just need to:
+### 3. Forecast and plot
 
-<ul>
-    <li>define the model parameter values and time series parameters by editing <code>options_forecast.m</code> </li>
-    <li>run the function <code>Run_Forecasting_GrowthModels.m</code> </li>
-</ul>
-  
-# Plotting forecasts and performance metrics based on the best-fit model
+```matlab
+rng(1, 'twister');
+Run_Forecasting_GrowthModels(1, 1, 20, 4);
+plotForecast_GrowthModels(1, 1, 20, 4);
+```
 
-After running <code>Run_Forecasting_GrowthModels.m</code>, you can use the toolbox to plot forecasts and performance metrics derived from the best fit model as follows:
+The fourth argument is the number of forecast steps. Four steps correspond to four weeks for weekly observations or four days for daily observations.
 
-<ul>
-    <li>run the function <code>plotForecast_GrowthModels.m</code></li>
-</ul>
+Results are written to `output/`. The plotting functions load saved `.mat` results and write additional summaries; they do not replace the fitting step. **Keep the options and window arguments consistent between running and plotting.** Existing output files with matching names can be overwritten.
 
-The function also outputs files with parameter estimates, the fit and forecast of the model, and the performance metrics for the calibration period and forecasting periods.
+Calling these functions without arguments uses the window and horizon settings in the corresponding options function. Assigning similarly named variables only in the MATLAB base workspace does not override those options.
 
-# Output Files & Naming Conventions
+## Input data
 
-All results are written to ./output/. The toolbox exports parameter estimates, in-sample fits, forecasts (with uncertainty), performance metrics, and (optionally) Rt and doubling-time series. Filenames include key run metadata so artifacts are self-describing.
+Place each dataset in `input/` as a numeric, two-column `.txt` file with **no header**:
 
-| File prefix                           | Produced by                                                             | Purpose                                                                         | Key columns / contents                                                             |
-| ------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `AICc-… .csv`                         | Fit / Forecast                                                          | Rolling-window model selection metric(s).                                       | `time`, `AICc` (optionally `AIC`, `BIC`).                                          |
-| `parameters-rollingwindow-… .csv`     | Fit / Forecast                                                          | Parameter estimates and 95% CIs per window.                                     | `time`, then for each parameter *p*: `p mean`, `p 95% CI LB`, `p 95% CI UB`.       |
-| `MCSEs-rollingwindow-… .csv`          | Fit / Forecast                                                          | Monte Carlo standard errors per parameter per window (bootstrap).               | `time`, `p MCSE` columns.                                                          |
-| `SCIs-rollingwindow-… .csv`           | Fit / Forecast                                                          | Identifiability span (SCI) per parameter.                                       | `time`, then `p SCI` where `SCI = log10(UB/LB)`.                                   |
-| `Fit-… .csv`                          | Fit                                                                     | In-sample fitted trajectory alongside the observed series.                      | `time`, `observed`, `fitted_mean` (and optionally residuals).                      |
-| `Forecast-… .csv`                     | **Forecast**                                                            | Point/central forecasts.                                                        | `time`, `mean`, `median` (and optionally `sd`).                                    |
-| `quantile-… .csv`                     | **Forecast**                                                            | Predictive distribution summaries (forecast quantiles).                         | `time`, `q0.025`, `q0.25`, `q0.50`, `q0.75`, `q0.975` (set may vary).              |
-| `performance-calibration-… .csv`      | Fit / Forecast                                                          | In-sample (calibration-window) metrics.                                         | `window/time`, `MAE`, `RMSE`, `MAPE`, `PI_coverage`, `PI_width`, `WIS` (may vary). |
-| `performance-forecast-… .csv`         | **Forecast**                                                            | Out-of-sample forecast metrics by horizon.                                      | `horizon`, `MAE`, `RMSE`, `MAPE`, `PI_coverage`, `PI_width`, `WIS`.                |
-| `Rt-… .csv`                           | **`plotFit_ReproductionNumber.m`, `plotForecast_ReproductionNumber.m`** | Effective reproduction number series from the fitted growth model & GI options. | `time`, `Rt_mean`/`Rt_median`, quantiles (e.g., `q0.025`, `q0.975`).               |
-| `DoublingTime-… .csv` *(if computed)* | Fit / Forecast                                                          | Doubling-time (or halving-time) estimates over time.                            | `time`, `DT_mean` (and quantiles if available).                                    |
+| Column | Meaning |
+| --- | --- |
+| 1 | A regularly spaced time index, preferably `0, 1, 2, …`, with one unit per observation interval. |
+| 2 | Observed incidence: the count in each interval, not the cumulative total. |
 
+For example, the beginning of the bundled file is:
 
-## 📄 License
+```text
+0   14
+1   16
+2   34
+3   80
+4   149
+5   261
+```
 
-This toolbox is licensed under the **GNU General Public License v3.0**.  
-See the [LICENSE](LICENSE) file for more details.
+Set `cadfilename1` to the filename without its extension, for example `'my_incidence_series'`. Use descriptive names of at least ten characters to avoid the current short-filename prefix-check issue.
 
-# Publications
+### Cumulative observations
 
-<ul>
+A filename beginning with `cumulative`, ignoring case, triggers conversion to incidence:
 
-<li>Chowell, G., Bleichrodt, A., Dahal, S. et al. GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories using phenomenological growth models. Sci Rep 14, 1630 (2024). https://doi.org/10.1038/s41598-024-51852-8 </li>
-    
-<li> Chowell, G. (2017). Fitting dynamic models to epidemic outbreaks with quantified uncertainty: A primer for parameter uncertainty, identifiability, and forecasts. Infectious Disease Modelling, 2(3), 379-398. </li>
+```matlab
+incidence = [cumulative(1); diff(cumulative)];
+```
 
-<li> Bürger, R., Chowell, G., & Lara-Díıaz, L. Y. (2019). Comparative analysis of phenomenological growth models applied to epidemic outbreaks. Mathematical Biosciences and Engineering, 16(5), 4250-4273. </li>
+For example, use `cumulative_mpox_series.txt`. A hyphen is not required. Cumulative data without this prefix will be interpreted as incidence; incidence data with this prefix will be differenced incorrectly.
 
-</ul>
+The first cumulative value is retained as the first incidence value. Check that this is appropriate for your series, especially when a file begins after an outbreak has already accumulated cases. Preparing a documented incidence series before loading is often clearer.
+
+### Before fitting
+
+Check that observations and times are finite, rows are ordered, and the time index has unit spacing. Missing intervals, irregular sampling, and negative reporting corrections require explicit preprocessing; do not silently replace missing observations with zeros or discard revisions. Keep the internal `DT=1` convention and express the observation interval through the time unit used in the analysis.
+
+Poisson and negative-binomial likelihoods require **nonnegative integer counts**. Rates, normalized values, and smoothed fractional observations are not count data. Zero counts within a series are legitimate, but all-zero windows and windows beginning at zero need special attention because the current initial-state and negative-binomial boundary handling is incomplete.
+
+## Growth models
+
+The ODE evolves a cumulative state, $C(t)$. The fitting objective constructs the incidence vector as `[C(t_1); diff(C(t))]`; its first entry is an initialization convention rather than a difference across a preceding observed interval.
+
+Set both `flag1` and `model_name1` to the matching values below.
+
+| `flag1` | `model_name1` | Model | Implemented equation |
+| ---: | --- | --- | --- |
+| `-1` | `'EXP'` | Exponential growth | $dC/dt = rC$ |
+| `0` | `'GGM'` | Generalized growth | $dC/dt = rC^p$ |
+| `1` | `'GLM'` | Generalized logistic growth | $dC/dt = rC^p(1-C/K)$ |
+| `2` | `'GRM'` | Generalized Richards | $dC/dt = rC^p[1-(C/K)^a]$ |
+| `3` | `'LM'` | Logistic growth | $dC/dt = rC(1-C/K)$ |
+| `4` | `'RICH'` | Richards | $dC/dt = rC[1-(C/K)^a]$ |
+| `5` | `'GOM'` | Gompertz, time-dependent growth-rate form | $dC/dt = rC\exp(-at)$ |
+
+Here, $r$ is a growth-scale parameter, $p$ controls departure from exponential growth, $K$ is a saturation parameter where present, and $a$ controls shape or growth-rate decay. Parameter meanings and units depend on the selected equation. The implemented Gompertz form does **not** use an independently estimated $K$.
+
+`fixI0=1` anchors the initial ODE state to the first observation in each calibration window; `fixI0=0` estimates it within the bounds in `fit_model.m`. Exported parameter tables can contain fixed or unused entries, so interpret only the parameters active in the selected model.
+
+Implementation: [`modifiedLogisticGrowth.m`](forecasting_growthmodels%20code/modifiedLogisticGrowth.m) and [`fit_model.m`](forecasting_growthmodels%20code/fit_model.m).
+
+## Configuration
+
+Use `options_fit.m` for fitting, `options_forecast.m` for forecasting, and `options_Rt.m` for generation-interval assumptions.
+
+| Setting | Meaning |
+| --- | --- |
+| `cadfilename1` | Input filename in `input/`; use the base name without `.txt`. |
+| `caddisease`, `datatype` | Labels used in plots and output filenames. |
+| `flag1`, `model_name1`, `fixI0` | Growth model and initial-state treatment. |
+| `method1`, `dist1` | Fitting criterion and bootstrap/predictive observation model; see below. |
+| `numstartpoints` | Number of random starts for the original-data fit, in addition to an informed starting point. Current bootstrap refits use two random starts internally. |
+| `B` | Number of simulated datasets to refit for bootstrap uncertainty. |
+| `windowsize1` | Number of observations in each calibration window. |
+| `tstart1`, `tend1` | First and last **window-start row indices**, inclusive; not the two endpoints of one calibration window. |
+| `forecastingperiod` | Number of observations to forecast beyond each calibration window. Forecast options only. |
+| `getperformance` | Controls some forecast reporting and plotting paths. It does not disable every evaluation call in the current forecasting runner. |
+
+### Fitting criterion: `method1`
+
+Let $\mu$ denote model-predicted incidence, $\alpha$ a dispersion parameter, and $d$ a variance-power parameter.
+
+| `method1` | Estimation method | Observation variance for MLE |
+| ---: | --- | --- |
+| `0` | Unweighted nonlinear least squares (sum of squared errors) | Not selected by `dist1` in the fitting objective. |
+| `1` | Poisson maximum likelihood | $\operatorname{Var}(Y)=\mu$ |
+| `3` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu$ |
+| `4` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu^2$ |
+| `5` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu^d$ |
+
+Use the method codes listed here; `method1=2` is not implemented in the active objective-function switch.
+
+### Bootstrap and predictive noise: `dist1`
+
+For `method1=0`, choose `dist1=0` for Gaussian noise, `dist1=1` for Poisson noise, or `dist1=2` for negative-binomial noise with an empirically estimated variance-to-mean factor. **Changing `dist1` does not turn least squares into weighted least squares.**
+
+For MLE, the options functions set `dist1` automatically to match `method1`: `1`, `3`, `4`, or `5`. Retain that selection logic when editing the options.
+
+The bootstrap refits simulated calibration datasets. Parameter-driven trajectories represent variability across those refits; additional observation-level draws are used for predictive intervals and quantiles. These are different uncertainty summaries. Increasing `B` improves Monte Carlo resolution but does not establish model adequacy or correct optimization and observation-model defects.
+
+Implementation: [`plotModifiedLogisticGrowthMethods1.m`](forecasting_growthmodels%20code/plotModifiedLogisticGrowthMethods1.m), [`AddErrorStructure.m`](forecasting_growthmodels%20code/AddErrorStructure.m), and the two runner functions.
+
+## Rolling windows and evaluation
+
+For a window starting at row `i`, the calibration rows are:
+
+```matlab
+i : i + windowsize1 - 1
+```
+
+For example, the following requests five overlapping 20-observation windows and a four-step forecast from each:
+
+```matlab
+rng(1, 'twister');
+Run_Forecasting_GrowthModels(1, 5, 20, 4);
+plotForecast_GrowthModels(1, 5, 20, 4);
+```
+
+The first window uses rows `1:20`; the last uses rows `5:24`. For a dataset with `N` observations, choose:
+
+```text
+Fitting:                  tend1 + windowsize1 - 1 <= N
+Fully scored forecasting: tend1 + windowsize1 + forecastingperiod - 1 <= N
+```
+
+These are **MATLAB row indices**, even when the first time label is zero. For live forecasting, future observations are unavailable and their forecast-error scores are undefined. Setting `getperformance=0` suppresses some reporting, but the current runner still calls evaluation helpers; check warnings and the output limitations below.
+
+### What the scores mean
+
+The standard performance CSVs report mean absolute error (MAE), mean squared error (MSE), empirical coverage of the nominal 95% prediction interval, and weighted interval score (WIS). Coverage is expressed as a percentage. RMSE and mean interval score are also computed internally and stored in performance `.mat` results.
+
+Forecast metrics at horizon `h` summarize the first **`h` forecast observations together**, not just the error at the `h`-step-ahead observation. The runner-level forecast summary retains the selected maximum horizon for each window. Distinguish calibration scores from out-of-sample forecast scores.
+
+MAE and MSE use the median of parameter-driven trajectories, whereas predictive quantiles and WIS use observation-level draws. These medians need not coincide. When comparing models, keep forecast targets, calibration windows, observation units, and score definitions aligned.
+
+Implementation: [`computeforecastperformance.m`](forecasting_growthmodels%20code/computeforecastperformance.m), [`computeWIS.m`](forecasting_growthmodels%20code/computeWIS.m), and [`Run_Forecasting_GrowthModels.m`](forecasting_growthmodels%20code/Run_Forecasting_GrowthModels.m).
+
+## Outputs
+
+Outputs are saved under `output/`. The table lists the principal products, not every intermediate file. `*` represents the run-specific filename suffix.
+
+| Files | Contents and interpretation |
+| --- | --- |
+| `Forecast-growthModel-*.mat` | Saved state for each calibration window, including fitted parameters, bootstrap results, and trajectories. Also used for fit-only runs with forecast horizon zero. Required by plotting functions. |
+| `parameters-growthModel-*.mat`, `performanceCalibration-growthModel-*.mat`, `performanceForecasting-growthModel-*.mat` | Aggregated parameter and performance results, as applicable. |
+| `QuantilesCalibration-growthModel-*.mat`, `QuantilesForecastingPerformance-growthModel-*.mat` | Calibration and forecast quantile arrays, as applicable. |
+| `AICcs-rollingwindow-*.csv` | Window-start index (`time`), AICc, its objective and penalty components, and parameter count. Not a combined AIC/AICc/BIC export. |
+| `parameters-rollingwindow-*.csv` | Bootstrap central estimates and 2.5th/97.5th percentile bounds. **Columns labeled `mean` currently contain medians.** |
+| `MCSES-rollingwindow-*.csv` | Bootstrap standard deviation divided by $\sqrt{B}$. This is a mean-MCSE formula, not an MCSE for the reported median. |
+| `SCIS-rollingwindow-*.csv` | The interval-span calculation $\log_{10}(UB/LB)$. Interpret only for appropriate positive bounds; it is not a formal identifiability test. |
+| `Fit-*.csv`, `Forecast-*.csv` | `time`, `data`, `median`, `LB`, `UB`; exported by plotting functions. Forecast files contain calibration and future rows. |
+| `quantile-fit-*.csv`, `quantile-forecast-*.csv` | Predictive quantiles exported by plotting functions. The 23 columns run from `Q_0.010` to `Q_0.990`, including `Q_0.025`, `Q_0.500`, and `Q_0.975`. |
+| `performance-calibration-*.csv`, `performance-forecasting-*.csv` | Window-start index, calibration length or forecast horizon, MAE, MSE, 95% prediction-interval coverage, and WIS, where available. |
+| `Rt-*.csv`, `doublingtimes-*.csv` | Reproduction-number or sequential doubling-time summaries from the relevant plotting routines. Subject to the diagnostic limitations below. |
+
+The quantile CSVs do **not** include a time column. Their rows follow calibration observations and then forecast observations, where present. Align them with the matching trajectory file or saved `timevect2`; do not assume a standalone time-stamped forecast format.
+
+Some forecast CSV paths write `NaN` for future time labels as well as unavailable observations. Recover target times from the saved forecast grid rather than treating missing labels as an absence of predictions.
+
+Preserve filename capitalization when scripting imports. Some exports encode window starts as `time`, while trajectory files contain actual time labels. Output names do not capture every setting: changing `B`, the random seed, or some optimizer settings may reuse a filename. Archive each analysis separately, and do not mistake bundled historical outputs for results of your current run.
+
+## Epidemiological diagnostics
+
+Configure generation-interval assumptions in [`options_Rt.m`](forecasting_growthmodels%20code/options_Rt.m):
+
+| Setting | Meaning |
+| --- | --- |
+| `type_GId1` | `1`: gamma; `2`: exponential; `3`: fixed-interval (delta) distribution. |
+| `mean_GI1` | Generation-interval mean in the same time units as the input index. |
+| `var_GI1` | Generation-interval variance in squared time units, used for the gamma option. |
+
+For unit conversion, a mean of five days is `5/7` weeks; a standard deviation of eight days corresponds to variance `(8/7)^2` weeks squared. These values illustrate conversion, **not a pathogen-specific recommendation**.
+
+After generating matching saved results, the diagnostic entry points are:
+
+```matlab
+% For the single-window examples above:
+plotFit_ReproductionNumber(1, 1, 20);
+plotForecast_ReproductionNumber(1, 1, 20, 4);
+```
+
+Growth-model plotting routines also calculate sequential doubling-time summaries. Reproduction numbers depend on the specified generation interval and the modeled incidence history; projected values are model-based extrapolations, not directly observed transmission measurements.
+
+## Reproducibility
+
+Set and record the random seed immediately before each analysis. Preserve the exact input data, preprocessing decisions, all three options files, window/horizon arguments, source revision, MATLAB/toolbox versions, warnings, and generated outputs. With Git, record the revision using `git rev-parse HEAD` from the repository.
+
+Use a separate archived output directory or a separate working copy for each analysis. Compare results across seeds and optimizer settings, inspect boundary estimates, and check the stability of bootstrap summaries. A saved seed supports repeatability; it does not establish convergence, model validity, or equivalence across software versions.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| `MultiStart`, `createOptimProblem`, `fmincon`, or a distribution function is unavailable | Confirm that the required MathWorks products are installed and licensed; inspect `ver` and `which`. |
+| Input file is not found | Run from `forecasting_growthmodels code`, check `input/`, and verify `cadfilename1` and capitalization. |
+| An unexpected function runs | Use `which functionName -all` and remove unintended duplicate copies from the active path. |
+| Plotting cannot load a `.mat` file | Run the matching fitting/forecasting function first, and use identical model, estimator, initial-state, window, and horizon settings. Older bundled results may use different filenames. |
+| A window is skipped or scores cannot be computed | Check row-index bounds, calibration length, number of free parameters, and availability of all requested future observations. |
+| A fit fails, saturates at a bound, or gives implausible intervals | Inspect the input scale, zeros, model-specific bounds, observation model, and solver diagnostics. Do not treat a larger bootstrap size as a repair. |
+
+## Citation and tutorials
+
+Please cite the toolbox paper when using GrowthPredict in research or teaching, and identify the software revision used:
+
+Chowell, G., Bleichrodt, A., Dahal, S., et al. (2024). **GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories using phenomenological growth models.** *Scientific Reports*, **14**, 1630. [doi:10.1038/s41598-024-51852-8](https://doi.org/10.1038/s41598-024-51852-8).
+
+The [video tutorial series](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2) provides additional demonstrations. Tutorial materials and bundled historical outputs may reflect earlier code revisions.
+
+Related methodological references:
+
+Chowell, G. (2017). Fitting dynamic models to epidemic outbreaks with quantified uncertainty: A primer for parameter uncertainty, identifiability, and forecasts. *Infectious Disease Modelling*, **2**(3), 379–398. [doi:10.1016/j.idm.2017.08.001](https://doi.org/10.1016/j.idm.2017.08.001).
+
+Bürger, R., Chowell, G., & Lara-Díaz, L. Y. (2019). Comparative analysis of phenomenological growth models applied to epidemic outbreaks. *Mathematical Biosciences and Engineering*, **16**(5), 4250–4273. [doi:10.3934/mbe.2019212](https://doi.org/10.3934/mbe.2019212).
+
+## Contributing
+
+Report reproducible problems through [GitHub Issues](https://github.com/gchowell/GrowthPredict-Toolbox/issues). Include the code revision, MATLAB/toolbox versions, relevant options, exact commands, error or warning text, and a small shareable dataset or synthetic example. Do not upload sensitive or restricted data. For code changes, describe the expected behavior and include a regression test demonstrating it.
+
+## License
+
+The project declares the **GNU General Public License v3.0 (GPL-3.0)**. A standalone `LICENSE` file containing the full license text still needs to be included in the repository.
+
