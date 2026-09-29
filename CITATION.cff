@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "GrowthPredict Toolbox"
-version: v1.0.0
+version: v1.0.2.
 date-released: 2026-09-29
 license: GPL-3.0-only         # use the license actually in your repo
 repository-code: "https://github.com/gchowell/GrowthPredict-Toolbox"
