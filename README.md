@@ -201,10 +201,10 @@ Let $\mu$ denote model-predicted incidence, $\alpha$ a dispersion parameter, and
 | `method1` | Estimation method | Observation variance for MLE |
 | ---: | --- | --- |
 | `0` | Unweighted nonlinear least squares (sum of squared errors) | Not selected by `dist1` in the fitting objective. |
-| `1` | Poisson maximum likelihood | $\operatorname{Var}(Y)=\mu$ |
-| `3` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu$ |
-| `4` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu^2$ |
-| `5` | Negative-binomial maximum likelihood | $\operatorname{Var}(Y)=\mu+\alpha\mu^d$ |
+| `1` | Poisson maximum likelihood | $\mathrm{Var}(Y)=\mu$ |
+| `3` | Negative-binomial maximum likelihood | $\mathrm{Var}(Y)=\mu+\alpha\mu$ |
+| `4` | Negative-binomial maximum likelihood | $\mathrm{Var}(Y)=\mu+\alpha\mu^2$ |
+| `5` | Negative-binomial maximum likelihood | $\mathrm{Var}(Y)=\mu+\alpha\mu^d$ |
 
 Use the method codes listed here; `method1=2` is not implemented in the active objective-function switch.
 
