@@ -54,7 +54,7 @@ if ~isfolder('output'), mkdir('output'); end
 
 **The code-folder name contains a space:** `forecasting_growthmodels code`, not `forecasting_growthmodels_code`. Run the workflows from this folder because input and output paths are relative to the current working directory.
 
-The repository also contains root-level copies of some functions. Use the implementations inside the code folder consistently; check MATLAB's function resolution with:
+Use the implementations inside the code folder consistently; check MATLAB's function resolution with:
 
 ```matlab
 which Run_Forecasting_GrowthModels -all
