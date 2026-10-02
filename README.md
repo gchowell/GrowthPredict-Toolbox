@@ -336,5 +336,5 @@ Report reproducible problems through [GitHub Issues](https://github.com/gchowell
 
 ## License
 
-The project declares the **GNU General Public License v3.0 (GPL-3.0)**. A standalone `LICENSE` file containing the full license text still needs to be included in the repository.
+The project declares the **GNU General Public License v3.0 (GPL-3.0)**.
 
