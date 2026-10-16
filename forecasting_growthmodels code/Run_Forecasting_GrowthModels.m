@@ -214,6 +214,10 @@ end
 
 AICcs=[];
 
+% Bootstrap counts across all rolling windows (reporting only).
+requestedBootstrap = M * numel(tstart1:1:tend1);
+acceptedBootstrap = 0;
+
 for i=tstart1:1:tend1  %rolling window analysis
 
     if (tend1-tstart1)>10
@@ -347,7 +351,8 @@ for i=tstart1:1:tend1  %rolling window analysis
         %params0=initialParams(data1(:,2),flag1);
         params0=P_model1d;
 
-        [P_model1,residual_model1 fitcurve_model1 forecastcurve_model1 timevect2]=fit_model(data1,params0,fixI0,2,DT,flag1,forecastingperiod);
+        [P_model1,residual_model1,fitcurve_model1,forecastcurve_model1,timevect2,~,bootstrapFval,bootstrapExitflag]=fit_model(data1,params0,fixI0,2,DT,flag1,forecastingperiod);
+        acceptedBootstrap = acceptedBootstrap + (bootstrapExitflag > 0 && isfinite(bootstrapFval));
 
         fit_model1=[fit_model1 fitcurve_model1];
 
@@ -804,3 +809,7 @@ disp(separator);
 
 
 
+% Print counts only; do not change fitting or retained results.
+fprintf('\nRequested bootstrap datasets: %d\n', requestedBootstrap);
+fprintf('Accepted bootstrap datasets: %d\n', acceptedBootstrap);
+fprintf('Unresolved bootstrap datasets: %d\n\n', requestedBootstrap - acceptedBootstrap);
