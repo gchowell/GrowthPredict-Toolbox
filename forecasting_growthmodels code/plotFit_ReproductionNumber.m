@@ -1,4 +1,4 @@
-function [param_R,param_doubling,seq_doublingtimes]=plotFit_ReproductionNumber(tstart1_pass,tend1_pass,windowsize1_pass)
+function [param_R,param_doubling,seq_doublingtimes]=plotFit_ReproductionNumber(tstart1_pass,tend1_pass,windowsize1_pass,options_pass,optionsRt_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
@@ -19,9 +19,27 @@ global method1 % Parameter estimation method
 % <=================== Load parameter values supplied by user =================>
 % <============================================================================>
 
-[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_fit;
+% Options: pass a function handle (e.g. @options_fit_mpox) as the last input to use
+% an options file other than options_fit.m; omitted or [] -> @options_fit.
+if exist('options_pass','var')~=1 || isempty(options_pass)
+    options_pass=@options_fit;
+end
+if ~isa(options_pass,'function_handle')
+    error('GrowthPredict:options','options_pass must be a function handle, e.g. @options_fit.');
+end
 
-[type_GId1_INP,mean_GI1_INP,var_GI1_INP]=options_Rt;
+[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_pass();
+
+% Results are written to ./output; create it when missing.
+if ~exist('./output','dir')
+    mkdir('./output');
+end
+
+if exist('optionsRt_pass','var')~=1 || isempty(optionsRt_pass)
+    optionsRt_pass=@options_Rt;
+end
+
+[type_GId1_INP,mean_GI1_INP,var_GI1_INP]=optionsRt_pass();
 
 
 % <=======================================================================================>
@@ -644,18 +662,18 @@ if method1==3 | method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mean
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:19) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB','alpha mean','alpha LB','alpha UB'};
+    T.Properties.VariableNames(1:19) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB','alpha estimate','alpha LB','alpha UB'};
 
 elseif method1==5
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end) param_ds(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:22) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB','alpha mean','alpha LB','alpha UB','d mean','d LB','d UB'};
+    T.Properties.VariableNames(1:22) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB','alpha estimate','alpha LB','alpha UB','d estimate','d LB','d UB'};
 else
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:16) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB'};
+    T.Properties.VariableNames(1:16) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB'};
 end
 
 writetable(T,strcat('./output/parameters-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))

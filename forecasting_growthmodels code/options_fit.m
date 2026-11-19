@@ -118,7 +118,7 @@ end
 
 % Optimization settings:
 numstartpoints = 10; % Number of initial guesses for global optimization (Multistart).
-B = 100;             % Number of bootstrap realizations for parameter uncertainty characterization.
+B = 300;             % Number of bootstrap realizations for parameter uncertainty characterization.
 
 % <============================================================================>
 % <========================== Growth Model ===================================>

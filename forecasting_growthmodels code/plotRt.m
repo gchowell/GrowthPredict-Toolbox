@@ -1,4 +1,4 @@
-function [Rts,params,performanceC,AICcs]=plotRt(tstart1_pass,tend1_pass,windowsize1_pass)
+function [Rts,params,performanceC,AICcs]=plotRt(tstart1_pass,tend1_pass,windowsize1_pass,options_pass,optionsRt_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
@@ -19,9 +19,27 @@ global method1 % Parameter estimation method
 % <=================== Load parameter values supplied by user =================>
 % <============================================================================>
 
-[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_fit;
+% Options: pass a function handle (e.g. @options_fit_mpox) as the last input to use
+% an options file other than options_fit.m; omitted or [] -> @options_fit.
+if exist('options_pass','var')~=1 || isempty(options_pass)
+    options_pass=@options_fit;
+end
+if ~isa(options_pass,'function_handle')
+    error('GrowthPredict:options','options_pass must be a function handle, e.g. @options_fit.');
+end
 
-[type_GId1_INP,mean_GI1_INP,var_GI1_INP]=options_Rt;
+[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_pass();
+
+% Results are written to ./output; create it when missing.
+if ~exist('./output','dir')
+    mkdir('./output');
+end
+
+if exist('optionsRt_pass','var')~=1 || isempty(optionsRt_pass)
+    optionsRt_pass=@options_Rt;
+end
+
+[type_GId1_INP,mean_GI1_INP,var_GI1_INP]=optionsRt_pass();
 
 
 % <=======================================================================================>

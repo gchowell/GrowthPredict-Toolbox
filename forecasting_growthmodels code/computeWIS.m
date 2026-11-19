@@ -40,16 +40,15 @@ for i=1:length(datac)
         
         w_k=alpha/2;
         
-        [alpha/2  1-alpha/2]
         
         
         % (1-lpha)x100 % prediction coverage
         
-        Lt=quantile(curvesforecasts2(i,:)',alpha/2)'
+        Lt=quantile(curvesforecasts2(i,:)',alpha/2)';
 
         Lt=(Lt>=0).*Lt;
         
-        Ut=quantile(curvesforecasts2(i,:)',1-alpha/2)'
+        Ut=quantile(curvesforecasts2(i,:)',1-alpha/2)';
 
         Ut=(Ut>=0).*Ut;
 

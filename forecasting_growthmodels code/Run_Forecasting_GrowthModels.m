@@ -1,4 +1,4 @@
-function   [AICcs,forecast_model1]=Run_Forecasting_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass)
+function   [AICcs,forecast_model1]=Run_Forecasting_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass,options_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
@@ -18,7 +18,21 @@ global method1 % Parameter estimation method
 % <=================== Load parameter values supplied by user =================>
 % <============================================================================>
 
-[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,getperformance_INP,forecastingperiod_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_forecast;
+% Options: pass a function handle (e.g. @options_forecast_mpox) as the last input to use
+% an options file other than options_forecast.m; omitted or [] -> @options_forecast.
+if exist('options_pass','var')~=1 || isempty(options_pass)
+    options_pass=@options_forecast;
+end
+if ~isa(options_pass,'function_handle')
+    error('GrowthPredict:options','options_pass must be a function handle, e.g. @options_forecast.');
+end
+
+[cadfilename1_INP,caddisease_INP,datatype_INP, dist1_INP, numstartpoints_INP,M_INP,flag1_INP,model_name1_INP,fixI0_INP,getperformance_INP,forecastingperiod_INP,windowsize1_INP,tstart1_INP,tend1_INP]=options_pass();
+
+% Results are written to ./output; create it when missing.
+if ~exist('./output','dir')
+    mkdir('./output');
+end
    
 % <============================================================================>
 % <================================ Datasets properties ==============================>
@@ -50,6 +64,10 @@ dist1=dist1_INP; %Define dist1 which is the type of error structure:
 % MLE (Neg Binomial)=5, with VAR=mean+alpha*mean^d;
 
 numstartpoints=numstartpoints_INP; % Number of initial guesses for optimization procedure using MultiStart
+
+numstartpoints_boot=1; % Box-wide start points for each bootstrap refit (a jittered copy of the best fit and the best fit itself are always added)
+
+fitopts=struct('logscale',true,'useParallel',false); % optimizer settings, see fit_model.m
 
 M=M_INP; % number of bootstrap realizations to characterize parameter uncertainty
 
@@ -102,7 +120,7 @@ if isempty(data)
     error('The dataset is empty')
 end
 
-if strcmp('CUMULATIVE',upper(cadfilename1(1:10)))==1
+if length(cadfilename1)>=10 & strcmp('CUMULATIVE',upper(cadfilename1(1:10)))==1
 
     data(:,2)=[data(1,2);diff(data(:,2))]; % Incidence curve
 
@@ -183,6 +201,14 @@ param_ds=[];
 MCSES=[];
 SCIs=[];
 
+% diagnostics per rolling window (see the block after the parameter estimates)
+param_bootmedians=[];
+estimOutsideCIs=[];
+fracLBs=[];
+fracUBs=[];
+startAgreements=[];
+bestFitOnBounds=[];
+
 RMSECSS=[];
 MSECSS=[];
 MAECSS=[];
@@ -238,7 +264,9 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     % first data point cannot be zero
     if datac(1)==0
-        warning('first data point in the time series is zero')
+        warning('GrowthPredict:FirstPointZero',['Window %d: the first data point is zero; it is replaced by 0.01 for the fit ' ...
+            '(as in Run_Fit_GrowthModels). Consider fixI0 = 0 or a later tstart1.'],i)
+        datac(1)=0.01;
         %continue
     end
 
@@ -258,7 +286,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     params0=initialParams(datac,flag1);
 
 
-    [P_model1d,residual_model1, fitcurve_model1d, forecastcurve_model1, timevect2, initialguess,fval]=fit_model(data1,params0,fixI0,numstartpoints,DT,flag1,0);
+    [P_model1d,residual_model1, fitcurve_model1d, forecastcurve_model1, timevect2, initialguess,fval,exitflag_model1d,fitDiagnostics_model1d]=fit_model(data1,params0,fixI0,numstartpoints,DT,flag1,0,fitopts);
 
 
     %plot(timevect1,data1(:,2),'ko')
@@ -268,9 +296,15 @@ for i=tstart1:1:tend1  %rolling window analysis
     %xlabel('Time')
     %ylabel('Cases')
 
-    [AICc,part1,part2,numparams]=getAICc(method1,dist1,flag1,fixI0,fval,length(data1(:,1)))
+    % Count likelihoods: complete fval to the full log-likelihood of the informative
+    % observations so that AICc is comparable across estimation methods (zero for least squares).
+    fvalAdjustAICc=growthAICcCountAdjustment(method1,data1(:,2),fixI0,P_model1d(6),P_model1d(7));
+
+    [AICc,part1,part2,numparams,nEff]=getAICc(method1,dist1,flag1,fixI0,fval,length(data1(:,1)),fvalAdjustAICc)
 
     AICcs=[AICcs;[i AICc part1 part2 numparams]];
+
+    poissonFallback=false; % set when dist1=2 is requested but the data are not over-dispersed
 
     if (method1==0 & dist1==1) 
 
@@ -278,16 +312,21 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     elseif (method1==0 & dist1==2)  % estimate <factor1> which is the variance to mean ratio to scale the NB error structure
 
-        binsize1=7;
+        % Pearson dispersion of the data around the FITTED curve (quasi-Poisson estimator),
+        % so that the epidemic trend is not counted as noise. It replaces the var/mean ratio
+        % of 7-point windows of the raw data (getMeanVarianceRatio), which the trend inflates.
+        % numparams also counts the Gaussian variance of the least-squares fit, hence the -1.
+        [factor1,dispInfo]=estimatePearsonDispersion(data1(:,2),fitcurve_model1d,numparams-1,1,fixI0);
 
-        [ratios,~] = getMeanVarianceRatio(data1(:,2), binsize1, 2);
+        if ~isfinite(factor1)
+            warning('GrowthPredict:Dispersion',['Window %d: the dispersion cannot be estimated (%d usable points for %d curve parameters). ' ...
+                'Using Poisson bootstrap noise for this window.'],i,dispInfo.nUsed,numparams-1)
+        end
 
-        index1=find(ratios(:,1)>0);
-
-        factor1=mean(ratios(index1,1));
-
-        if factor1<1
-            dist1=1;
+        % VAR = factor1*mean needs factor1 > 1. Not over-dispersed -> Poisson noise for THIS
+        % window's bootstrap only (dist1_boot); dist1 and the output file names are unchanged.
+        if ~isfinite(factor1) || factor1<=1
+            poissonFallback=true;
             factor1=1;
         end
 
@@ -335,12 +374,26 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     Phatss_model1=zeros(M,7);
 
+    dist1_boot=dist1; % noise model of this window's bootstrap
+    if poissonFallback
+        dist1_boot=1;
+    end
+
+    % Every bootstrap refit uses the parameter bounds of the fit to the observed data and
+    % starts from that fit (see fit_model.m, 'Bounds of bootstrap refits').
+    fitopts_boot=fitopts;
+    fitopts_boot.LB=fitDiagnostics_model1d.LB;
+    fitopts_boot.UB=fitDiagnostics_model1d.UB;
+
+    bootLB=NaN(M,7); % optimizer box of every bootstrap refit
+    bootUB=NaN(M,7);
+
     f_model1_sims=[];
 
     for j=1:M
 
 
-        f_model1_sim=AddErrorStructure(cumsum(fitcurve_model1d),1,dist1,factor1,d);
+        f_model1_sim=AddErrorStructure(cumsum(fitcurve_model1d),1,dist1_boot,factor1,d);
 
         f_model1_sims=[f_model1_sims f_model1_sim];
 
@@ -351,7 +404,10 @@ for i=tstart1:1:tend1  %rolling window analysis
         %params0=initialParams(data1(:,2),flag1);
         params0=P_model1d;
 
-        [P_model1,residual_model1,fitcurve_model1,forecastcurve_model1,timevect2,~,bootstrapFval,bootstrapExitflag]=fit_model(data1,params0,fixI0,2,DT,flag1,forecastingperiod);
+        [P_model1,residual_model1,fitcurve_model1,forecastcurve_model1,timevect2,~,bootstrapFval,bootstrapExitflag,fitDiagnostics_boot]=fit_model(data1,params0,fixI0,numstartpoints_boot,DT,flag1,forecastingperiod,fitopts_boot);
+
+        bootLB(j,:)=fitDiagnostics_boot.LB;
+        bootUB(j,:)=fitDiagnostics_boot.UB;
         acceptedBootstrap = acceptedBootstrap + (bootstrapExitflag > 0 && isfinite(bootstrapFval));
 
         fit_model1=[fit_model1 fitcurve_model1];
@@ -360,11 +416,11 @@ for i=tstart1:1:tend1  %rolling window analysis
 
         if method1==0
 
-            forecast_model12=[forecast_model12 AddErrorStructure(cumsum(forecastcurve_model1),20,dist1,factor1,0)];
+            forecast_model12=[forecast_model12 AddErrorStructure(cumsum(forecastcurve_model1),20,dist1_boot,factor1,0)];
 
         else
 
-            forecast_model12=[forecast_model12 AddErrorStructure(cumsum(forecastcurve_model1),20,dist1,P_model1(end-1),P_model1(end))];
+            forecast_model12=[forecast_model12 AddErrorStructure(cumsum(forecastcurve_model1),20,dist1_boot,P_model1(end-1),P_model1(end))];
 
         end
 
@@ -427,18 +483,69 @@ for i=tstart1:1:tend1  %rolling window analysis
     % <========================================================================================>
 
 
-    % estimate mean and 95% CI from distribution of parameter estimates
-    param_r=[median(Phatss_model1(:,1)) quantile(Phatss_model1(:,1),0.025) quantile(Phatss_model1(:,1),0.975)];
-    param_p=[median(Phatss_model1(:,2)) quantile(Phatss_model1(:,2),0.025) quantile(Phatss_model1(:,2),0.975)];
+    % Point estimate = fit to the observed data (P_model1d); the 95% CI is the 2.5-97.5%
+    % percentile range of the bootstrap refits. (Before November 2026 the point estimate
+    % was the bootstrap median; the medians are kept in param_bootmedians.)
+    param_r=[P_model1d(1) quantile(Phatss_model1(:,1),0.025) quantile(Phatss_model1(:,1),0.975)];
+    param_p=[P_model1d(2) quantile(Phatss_model1(:,2),0.025) quantile(Phatss_model1(:,2),0.975)];
 
-    param_a=[median(Phatss_model1(:,3)) quantile(Phatss_model1(:,3),0.025) quantile(Phatss_model1(:,3),0.975)];
-    param_K=[median(Phatss_model1(:,4)) quantile(Phatss_model1(:,4),0.025) quantile(Phatss_model1(:,4),0.975)];
+    param_a=[P_model1d(3) quantile(Phatss_model1(:,3),0.025) quantile(Phatss_model1(:,3),0.975)];
+    param_K=[P_model1d(4) quantile(Phatss_model1(:,4),0.025) quantile(Phatss_model1(:,4),0.975)];
 
-    param_I0=[median(Phatss_model1(:,5)) quantile(Phatss_model1(:,5),0.025) quantile(Phatss_model1(:,5),0.975)];
+    param_I0=[P_model1d(5) quantile(Phatss_model1(:,5),0.025) quantile(Phatss_model1(:,5),0.975)];
 
-    param_alpha=[median(Phatss_model1(:,6)) quantile(Phatss_model1(:,6),0.025) quantile(Phatss_model1(:,6),0.975)];
+    param_alpha=[P_model1d(6) quantile(Phatss_model1(:,6),0.025) quantile(Phatss_model1(:,6),0.975)];
 
-    param_d=[median(Phatss_model1(:,7)) quantile(Phatss_model1(:,7),0.025) quantile(Phatss_model1(:,7),0.975)];
+    param_d=[P_model1d(7) quantile(Phatss_model1(:,7),0.025) quantile(Phatss_model1(:,7),0.975)];
+
+    % <========================================================================================>
+    % <=========================== Diagnostics of the estimates ===============================>
+    % <========================================================================================>
+
+    paramlabels1={'r','p','a','K','I0','alpha','d'};
+
+    % A best fit on a bound means the bound, not the data, determined that estimate.
+    bestFitOnBound=fitDiagnostics_model1d.atLB | fitDiagnostics_model1d.atUB;
+
+    if any(bestFitOnBound)
+        warning('GrowthPredict:BestFitOnBound',['Window %d: the fitted value of %s is on its parameter bound ' ...
+            '(bounds are set in fit_model.m from the data).'],i,strjoin(paramlabels1(bestFitOnBound),', '))
+    end
+
+    param_bootmedian=median(Phatss_model1,1);
+
+    % A fitted value outside its own bootstrap interval signals bootstrap bias (often an
+    % estimate on a bound or along a ridge), not a coding error: inspect the fit.
+    estimOutsideCI=(P_model1d(:)'<quantile(Phatss_model1,0.025,1)) | (P_model1d(:)'>quantile(Phatss_model1,0.975,1));
+
+    if any(estimOutsideCI)
+        warning('GrowthPredict:EstimateOutsideCI',['Window %d: the fitted value of %s lies outside its bootstrap 95%% interval. ' ...
+            'Inspect the fit before reporting.'],i,strjoin(paramlabels1(estimOutsideCI),', '))
+    end
+
+    % Share of bootstrap estimates sitting on the optimizer bounds (NaN for fixed parameters).
+    % A large share means the interval is set by the box rather than by the data.
+    [fracLB,fracUB]=boundHitFractions(Phatss_model1,bootLB,bootUB);
+
+    boundLimited=(fracLB>0.05) | (fracUB>0.05);
+
+    if any(boundLimited)
+        warning('GrowthPredict:BoundLimited',['Window %d: more than 5%% of the bootstrap estimates of %s are on a parameter bound; ' ...
+            'the confidence interval is limited by the bounds set in fit_model.'],i,strjoin(paramlabels1(boundLimited),', '))
+    end
+
+    if fitDiagnostics_model1d.startAgreement<0.5
+        warning('GrowthPredict:StartAgreement',['Window %d: only %.0f%% of the converged optimizer starts reached the best objective value; ' ...
+            'the likelihood surface may be multimodal. Consider increasing numstartpoints.'],i,100*fitDiagnostics_model1d.startAgreement)
+    end
+
+    param_bootmedians=[param_bootmedians; param_bootmedian];
+    estimOutsideCIs=[estimOutsideCIs; double(estimOutsideCI)];
+    fracLBs=[fracLBs; fracLB];
+    fracUBs=[fracUBs; fracUB];
+    startAgreements=[startAgreements; fitDiagnostics_model1d.startAgreement];
+    bestFitOnBounds=[bestFitOnBounds; double(bestFitOnBound)];
+
 
     MCSE=[std(Phatss_model1(:,1))/sqrt(M) std(Phatss_model1(:,2))/sqrt(M) std(Phatss_model1(:,3))/sqrt(M) std(Phatss_model1(:,4))/sqrt(M) std(Phatss_model1(:,5))/sqrt(M) std(Phatss_model1(:,6))/sqrt(M) std(Phatss_model1(:,7))/sqrt(M)];
 
@@ -617,7 +724,7 @@ data1 = [timevect1 datac];
 
 
 %save model parameters from tstart1 to tend1
-save(strcat('./output/parameters-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-',num2str(forecastingperiod),'.mat'), 'param_rs', 'param_as', 'param_ps', 'param_Ks', 'param_I0s', 'param_alphas', 'param_ds','-mat')
+save(strcat('./output/parameters-growthModel-',cadfilename1,'-flag1-',num2str(flag1(1)),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-forecastingperiod-',num2str(forecastingperiod),'.mat'), 'param_rs', 'param_as', 'param_ps', 'param_Ks', 'param_I0s', 'param_alphas', 'param_ds', 'param_bootmedians', 'estimOutsideCIs', 'fracLBs', 'fracUBs', 'startAgreements', 'bestFitOnBounds','-mat')
 
 %save calibration performance metrics from tstart1 to tend1 (AICc, MSE,
 %MAE, coverage 95% PI, MIS, WIS)
@@ -658,7 +765,7 @@ if method1==3 || method1==4  %save parameter alpha. VAR=mean+alpha*mean; VAR=mea
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:19) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB','alpha mean','alpha LB','alpha UB'};
+    T.Properties.VariableNames(1:19) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB','alpha estimate','alpha LB','alpha UB'};
 
     rollparams=[(tstart1:1:tend1)' MCSES(:,1:6)];
     T2 = array2table(rollparams);
@@ -673,7 +780,7 @@ elseif method1==5
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end) param_alphas(:,1:end) param_ds(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:22) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB','alpha mean','alpha LB','alpha UB','d mean','d LB','d UB'};
+    T.Properties.VariableNames(1:22) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB','alpha estimate','alpha LB','alpha UB','d estimate','d LB','d UB'};
 
     rollparams=[(tstart1:1:tend1)' MCSES(:,1:7)];
     T2 = array2table(rollparams);
@@ -687,7 +794,7 @@ else
 
     rollparams=[(tstart1:1:tend1)' param_rs(:,1:end) param_ps(:,1:end) param_as(:,1:end) param_Ks(:,1:end) param_I0s(:,1:end)];
     T = array2table(rollparams);
-    T.Properties.VariableNames(1:16) = {'time','r mean','r LB','r UB','p mean','p LB','p UB','a mean','a LB','a UB','K0 mean','K0 LB','K0 UB','I0 mean','I0 LB','I0 UB'};
+    T.Properties.VariableNames(1:16) = {'time','r estimate','r LB','r UB','p estimate','p LB','p UB','a estimate','a LB','a UB','K0 estimate','K0 LB','K0 UB','I0 estimate','I0 LB','I0 UB'};
 
     rollparams=[(tstart1:1:tend1)' MCSES(:,1:5)];
     T2 = array2table(rollparams);
@@ -705,6 +812,28 @@ writetable(T,strcat('./output/parameters-rollingwindow-flag1-',num2str(flag1),'-
 writetable(T2,strcat('./output/MCSES-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 writetable(T3,strcat('./output/SCIS-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
+
+% <=============================================================================================>
+% <============ Save csv file with the diagnostics of the rolling window analysis ==============>
+% <=============================================================================================>
+% startAgreement: share of converged optimizer starts that reached the best objective value.
+% boot median: median of the bootstrap refits (the point estimate reported until November 2026).
+% frac at LB / UB: share of bootstrap estimates on the lower / upper bound (NaN = parameter fixed).
+% outside CI: 1 when the point estimate lies outside its bootstrap 95% CI.
+% best fit on bound: 1 when the point estimate sits on its lower or upper bound.
+
+diaglabels1={'r','p','a','K0','I0','alpha','d'};
+diagnames1=[{'time','startAgreement'}, ...
+    cellfun(@(s) [s ' boot median'],diaglabels1,'UniformOutput',false), ...
+    cellfun(@(s) [s ' frac at LB'],diaglabels1,'UniformOutput',false), ...
+    cellfun(@(s) [s ' frac at UB'],diaglabels1,'UniformOutput',false), ...
+    cellfun(@(s) [s ' outside CI'],diaglabels1,'UniformOutput',false), ...
+    cellfun(@(s) [s ' best fit on bound'],diaglabels1,'UniformOutput',false)];
+
+T4 = array2table([(tstart1:1:tend1)' startAgreements param_bootmedians fracLBs fracUBs estimOutsideCIs bestFitOnBounds]);
+T4.Properties.VariableNames = diagnames1;
+
+writetable(T4,strcat('./output/diagnostics-rollingwindow-flag1-',num2str(flag1),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-tstart-',num2str(tstart1),'-tend-',num2str(tend1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 
 % <========================================================================================>
