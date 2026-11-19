@@ -263,6 +263,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     line2=[param_r(1,2) 10;param_r(1,3) 10];
     line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
+    addEstimateLine(param_r(1,1)); % fitted estimate (black dashed line)
 
     xlabel('r')
     ylabel('Frequency')
@@ -279,6 +280,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     line2=[param_p(1,2) 10;param_p(1,3) 10];
     line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
+    addEstimateLine(param_p(1,1)); % fitted estimate (black dashed line)
 
     xlabel('p')
     ylabel('Frequency')
@@ -296,6 +298,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     line2=[param_a(1,2) 10;param_a(1,3) 10];
     line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
+    addEstimateLine(param_a(1,1)); % fitted estimate (black dashed line)
 
     xlabel('a')
     ylabel('Frequency')
@@ -312,6 +315,7 @@ for i=tstart1:1:tend1  %rolling window analysis
     line2=[param_K(1,2) 10;param_K(1,3) 10];
     line1=plot(line2(:,1),line2(:,2),'r--');
     set(line1,'LineWidth',2)
+    addEstimateLine(param_K(1,1)); % fitted estimate (black dashed line)
 
     xlabel('K')
     ylabel('Frequency')
