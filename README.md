@@ -93,6 +93,18 @@ plotForecast_GrowthModels(1, 1, 20, 4, opts);
 
 For a fit-only analysis, the options handle is the fourth argument to both functions. A bundled GLM example fits a simulated series with known growth parameters. Other configurations cover cholera and country-specific mpox series. Check the input filename and window settings when adapting an example. [Simulated GLM fit options](forecasting_growthmodels%20code/options_fit_GLM.m) · [Example datasets](forecasting_growthmodels%20code/input)
 
+For a fit of `w` observations in a file with `N` rows, the last possible window starts at row `N - w + 1`. The following examples each fit the last 20 observations of the indicated file. Use the same start row for both window arguments to fit one window.
+
+| Fit options | Input file | Rows in file | Calibration rows |
+| --- | --- | ---: | --- |
+| [`options_fit_mpox`](forecasting_growthmodels%20code/options_fit_mpox.m) or [`options_fit_mpoxCDC`](forecasting_growthmodels%20code/options_fit_mpoxCDC.m) | `Most_Recent_Timeseries_US-CDC.txt` | 32 | 13–32 |
+| [`options_fit_fluAlaska`](forecasting_growthmodels%20code/options_fit_fluAlaska.m) | `curve1.txt` | 50 | 31–50 |
+
+```matlab
+Run_Fit_GrowthModels(13, 13, 20, @options_fit_mpoxCDC);
+plotFit_GrowthModels(13, 13, 20, @options_fit_mpoxCDC);
+```
+
 ## Input data
 
 Place a numeric, headerless, two-column text file in `input/`. Set `cadfilename1` to its filename, with or without `.txt`. Set `caddisease` and `datatype` to the labels to use in plots and CSV filenames.
@@ -126,7 +138,7 @@ The options function sets `method1` (the fitting criterion) and `dist1` (the obs
 
 | `method1` | Fit to observations | Bootstrap and predictive noise |
 | ---: | --- | --- |
-| 0 | Unweighted nonlinear least squares | Choose `dist1 = 0` for Gaussian, `1` for Poisson or `2` for negative binomial with variance $\phi\mu$. All three minimize the same sum of squared errors. |
+| 0 | Unweighted nonlinear least squares, minimizing $\sum_i (y_i-\mu_i)^2$ | `dist1` selects the noise for bootstrap datasets and predictive draws. Choose `0` for Gaussian, `1` for Poisson or `2` for negative binomial with variance $\phi\mu$. |
 | 1 | Poisson maximum likelihood | `dist1 = 1`, variance $\mu$. |
 | 3 | Negative-binomial maximum likelihood | `dist1 = 3`, variance $\mu + \alpha\mu$. |
 | 4 | Negative-binomial maximum likelihood | `dist1 = 4`, variance $\mu + \alpha\mu^2$. |
@@ -201,7 +213,13 @@ The console reports requested, accepted and unresolved bootstrap fits. Acceptanc
 
 The growth-model plots also export `doublingtimes-*.csv` from the fitted calibration trajectories. Each row describes a successive doubling of cumulative incidence, with its mean elapsed time, percentile limits and the fraction of bootstrap trajectories reaching that doubling.
 
-To estimate the effective reproduction number $R_t$, first run the matching fit or forecast. Supply the generation-interval distribution in observation-time units. The choices are gamma (`type_GId1 = 1`), exponential (`2`), or fixed interval (`3`). The gamma option uses `mean_GI1` and `var_GI1` in time units and squared time units, respectively. Both plotting functions also accept a custom generation-interval function as the final argument. [Generation-interval options](forecasting_growthmodels%20code/options_Rt.m)
+To estimate the effective reproduction number $R_t$, first run the matching fit or forecast. The final argument to each plotting function is an options function, such as `@options_Rt`. It takes no inputs and returns `[type_GId1, mean_GI1, var_GI1]`. To use different settings, copy the options function and pass its handle. [Generation-interval options](forecasting_growthmodels%20code/options_Rt.m)
+
+| `type_GId1` | Generation interval | Settings used |
+| ---: | --- | --- |
+| 1 | Gamma | Mean in observation-time units and variance in squared units |
+| 2 | Exponential | Mean in observation-time units |
+| 3 | Fixed | A positive lag in multiples of 0.01 observation-time units |
 
 ```matlab
 plotFit_ReproductionNumber(1, 1, 20, @options_fit, @options_Rt);
@@ -214,11 +232,19 @@ plotForecast_ReproductionNumber(1, 1, 20, 4, @options_forecast, @options_Rt);
 
 *Output of `plotFit_ReproductionNumber` for the fit-only example. **Top:** observations and fitted trajectories. **Bottom:** median $R_t$ (solid red) with its 95% interval (red dashed), the threshold $R_t = 1$ and the end of the calibration window (black dashed lines).*
 
-The renewal calculation interpolates incidence on a 0.01-unit grid and uses only the incidence history within the window. The gamma and exponential routines evaluate their distribution on the supplied time axis, so use a window starting at time zero to interpret the grid as elapsed lag. The fixed-interval option requires a mean on the 0.01-unit grid. The estimates returned by `get_Rt` align with `ts(2:end)`. The intermediate rows of the `Rt-*.csv` export use a one-grid-step offset relative to that pairing. [Renewal calculation](forecasting_growthmodels%20code/get_Rt.m)
+The renewal calculation interpolates incidence on a 0.01-unit grid and uses the incidence history within the window. The gamma and exponential routines evaluate their distribution on the supplied time axis, so use a window starting at time zero to interpret the grid as elapsed lag. For a fixed lag $g$, the estimate is $I(t)/I(t-g)$ wherever the lagged incidence is available and positive. Earlier versions of `get_Rt.m` placed the fixed lag one grid step late. [Renewal calculation](forecasting_growthmodels%20code/get_Rt.m)
+
+For exact timing, pair the values returned by `get_Rt` with `ts(2:end)`. In the `Rt-*.csv` export, the time labels before the final row are 0.01 units earlier than the corresponding estimates.
 
 ## Reproducibility and support
 
-The figures in this README are produced by [`make_readme_figures.m`](forecasting_growthmodels%20code/make_readme_figures.m), which runs the examples above with `rng(1, 'twister')` and writes the images to `docs/images/`. Run it from the code folder; `make_readme_figures(false)` only redraws from the MAT files already in `output/`.
+To regenerate all six README figures from a fresh checkout, run the following command from the code folder. It resets the random seed to `rng(1, 'twister')` before each runner and writes the PNGs to `docs/images/`. The rolling-window parameter plot uses the Curve Fitting Toolbox. [Figure-generation script](forecasting_growthmodels%20code/make_readme_figures.m)
+
+```matlab
+make_readme_figures
+```
+
+After the full run, `make_readme_figures(false)` redraws the figures from the saved MAT files. It needs the 20-observation fit starting at row 1, the single-window four-step forecast starting at row 1, and the six-window four-step forecast starting at rows 1–6. The historical MAT files bundled in `output/` use other settings.
 
 Record the repository revision (`git rev-parse HEAD`), MATLAB and toolbox versions (`ver`), input data, options functions, window arguments and random seed. Output filenames omit the seed, `B` and some optimizer settings, so archive results before rerunning with those settings changed. The repository also includes historical outputs.
 
