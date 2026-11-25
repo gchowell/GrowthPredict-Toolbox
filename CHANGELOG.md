@@ -41,7 +41,7 @@ Versions follow the tags of this repository. Entries list what changed for a use
 - **`selectRtRows.m`** selects the estimates with enough history.
 - **Fourth input of `getDoublingTimeCurve.m`,** `priorCumulative`: cases counted before the first point of the curve.
 - **`setParameterTitle.m`, `parameterTitleText.m` and `fitParameterTitles.m`** write and size the titles of the parameter histograms. `fitParameterTitles(fig)` can be called after resizing a figure from a script; figures resized by hand follow on their own.
-- **Regression tests** in `forecasting_growthmodels code/tests` (50 tests in seven files); run `runtests('tests')` from the code folder.
+- **Regression tests** in `forecasting_growthmodels code/tests` (49 tests in seven files); run `runtests('tests')` from the code folder.
 - **Validation notes** in `docs/validation`, with the Python re-implementations used to check each change.
 - **This changelog.**
 
