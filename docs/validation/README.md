@@ -10,12 +10,13 @@ Each change in v1.1.0 was checked against an independent Python re-implementatio
 | Reproduction number at the start of a window | [reproduction-number-coverage.md](reproduction-number-coverage.md) | `tests/test_selectRtRows.m` (7) |
 | Doubling times for windows inside an epidemic | [doubling-times.md](doubling-times.md) | `tests/test_doublingTime.m` (5) |
 | Time origin of the Gompertz model | [gompertz.md](gompertz.md) | `tests/test_gompertz.m` (6) |
+| Titles of the parameter histograms | [figure-titles.md](figure-titles.md) | `tests/test_parameterTitle.m` (11) |
 
 ## What was run in MATLAB
 
 Run by the maintainer on 25 Nov 2026 from `forecasting_growthmodels code`, on the U.S. mpox series (`Most_Recent_Timeseries_US-CDC.txt`).
 
-- **Regression tests.** `runtests('tests')` passed 39 of 39 across the six files in the table.
+- **Regression tests.** `runtests('tests')` passed 39 of 39 across the first six files in the table. `test_parameterTitle.m` was added after that run and has not been run in MATLAB yet; with it the suite has 50 tests.
 - **Direct checks.** The Python value is from the re-implementations in `python/`.
 
 | Check | Python | MATLAB |

@@ -1,0 +1,83 @@
+=== 1. Number format (three significant digits)
+  [PASS] 1.7302 -> 1.73
+  [PASS] 0.8526 -> 0.853
+  [PASS] 1 -> 1
+  [PASS] 28547.1 -> 28500
+  [PASS] 801.8 -> 802
+  [PASS] 0.17743 -> 0.177
+  [PASS] 18153.2 -> 18200
+  [PASS] 0.0012345 -> 0.00123
+  [PASS] 999.6 -> 1000
+  [PASS] 9.996 -> 10
+  [PASS] 123456.7 -> 123000
+  [PASS] 1234567.0 -> 1.23e6
+  [PASS] 285000000.0 -> 2.85e8
+  [PASS] 3.2e-05 -> 3.20e-5
+  [PASS] 0 -> 0
+  [PASS] -0.52 -> -0.52
+  [PASS] 10 -> 10
+  [PASS] 0.5 -> 0.5
+  [PASS] 100 -> 100
+  [PASS] 999999.5 -> 1.00e6
+  [PASS] 0.001 -> 0.001
+  [PASS] 0.00099949 -> 9.99e-4
+  [PASS] NaN, Inf, -Inf
+  [PASS] 20,000 random values: largest relative rounding error 0.00497 (three significant digits allow 0.005)
+
+=== 2. Title text
+  quick start (rows 1-20)    before: r=1.7 (95% CI:1.5,2.1)             after: r = 1.73 | 95% CI (1.49, 2.08)
+  quick start (rows 1-20)    before: p=0.85 (95% CI:0.83,0.87)          after: p = 0.853 | 95% CI (0.828, 0.874)
+  quick start (rows 1-20)    before: a=1 (95% CI:1,1)                   after: a = 1 | 95% CI (1, 1)
+  quick start (rows 1-20)    before: K=2.9e+04 (95% CI:2.7e+04,3e+04)   after: K = 28500 | 95% CI (27300, 29900)
+  rows 13-32                 before: r=8e+02 (95% CI:5.7e+02,1.2e+03)   after: r = 802 | 95% CI (571, 1210)
+  rows 13-32                 before: p=0.18 (95% CI:0.13,0.22)          after: p = 0.178 | 95% CI (0.128, 0.223)
+  rows 13-32                 before: a=1 (95% CI:1,1)                   after: a = 1 | 95% CI (1, 1)
+  rows 13-32                 before: K=1.8e+04 (95% CI:1.8e+04,1.8e+04) after: K = 18200 | 95% CI (18000, 18500)
+  large and small values     before: r=0.0012 (95% CI:0.001,0.0019)     after: r = 0.00123 | 95% CI (0.00101, 0.00187)
+  large and small values     before: p=1 (95% CI:0.95,1)                after: p = 0.999 | 95% CI (0.951, 1)
+  large and small values     before: a=4.1 (95% CI:0.012,9.9)           after: a = 4.07 | 95% CI (0.0123, 9.87)
+  large and small values     before: K=2.8e+08 (95% CI:1e+08,9.9e+08)   after: K = 2.85e8 | 95% CI (1.02e8, 9.91e8)
+
+=== 3. Layout with Helvetica/Arial metrics: smallest gap between neighbouring titles (points; negative = overlap)
+  README export 864 x 475   quick start (rows 1-20)  before: gap  -136.8, overlapping pairs 3, 26.4 pt bold | after: gap   54.1, right margin   80.3, top margin   4.3, font 13.4 pt, widest 1.03 axes widths
+  [PASS] no overlap, inside the figure
+  README export 864 x 475   rows 13-32               before: gap  -188.2, overlapping pairs 3, 26.4 pt bold | after: gap   54.1, right margin   80.3, top margin   4.3, font 13.4 pt, widest 1.03 axes widths
+  [PASS] no overlap, inside the figure
+  README export 864 x 475   large and small values   before: gap  -184.5, overlapping pairs 3, 26.4 pt bold | after: gap   61.7, right margin   88.4, top margin   8.3, font 11.3 pt, widest 1.00 axes widths
+  [PASS] no overlap, inside the figure
+  default figure 560 x 420  quick start (rows 1-20)  before: gap  -199.5, overlapping pairs 3, 26.4 pt bold | after: gap   35.3, right margin   52.2, top margin   9.0, font  8.7 pt, widest 1.02 axes widths
+  [PASS] no overlap, inside the figure
+  default figure 560 x 420  rows 13-32               before: gap  -250.9, overlapping pairs 3, 26.4 pt bold | after: gap   35.3, right margin   52.2, top margin   9.0, font  8.7 pt, widest 1.02 axes widths
+  [PASS] no overlap, inside the figure
+  default figure 560 x 420  large and small values   before: gap  -247.2, overlapping pairs 3, 26.4 pt bold | after: gap   39.9, right margin   57.3, top margin  11.7, font  7.3 pt, widest 1.00 axes widths
+  [PASS] no overlap, inside the figure
+  large 1440 x 800          quick start (rows 1-20)  before: gap   -18.0, overlapping pairs 1, 26.4 pt bold | after: gap  130.6, right margin  156.5, top margin  20.0, font 18.0 pt, widest 0.83 axes widths
+  [PASS] no overlap, inside the figure
+  large 1440 x 800          rows 13-32               before: gap   -69.5, overlapping pairs 2, 26.4 pt bold | after: gap  130.6, right margin  156.5, top margin  20.0, font 18.0 pt, widest 0.83 axes widths
+  [PASS] no overlap, inside the figure
+  large 1440 x 800          large and small values   before: gap   -65.7, overlapping pairs 2, 26.4 pt bold | after: gap  110.8, right margin  151.5, top margin  20.0, font 18.0 pt, widest 0.96 axes widths
+  [PASS] no overlap, inside the figure
+  narrow 400 x 420          quick start (rows 1-20)  before: gap  -232.5, overlapping pairs 3, 26.4 pt bold | after: gap   25.2, right margin   37.2, top margin  13.7, font  6.2 pt, widest 1.02 axes widths
+  [PASS] no overlap, inside the figure
+  narrow 400 x 420          rows 13-32               before: gap  -283.8, overlapping pairs 3, 26.4 pt bold | after: gap   25.2, right margin   37.2, top margin  13.7, font  6.2 pt, widest 1.02 axes widths
+  [PASS] no overlap, inside the figure
+  narrow 400 x 420          large and small values   before: gap  -280.1, overlapping pairs 3, 26.4 pt bold | after: gap   20.3, right margin   36.6, top margin  14.2, font  6.0 pt, widest 1.15 axes widths
+  [PASS] no overlap, inside the figure
+  [PASS] the one-line bold titles overlap in every case above
+
+=== 4. Wider fonts: rule alone, then with the correction by rendered width
+  DejaVu Sans       README export 864 x 475   rule: font 11.3 pt, widest 1.13 axes widths, gap 47.4 | corrected: font 11.3 pt, widest 1.13, gap 47.4
+  [PASS] titles are at most 1.15 axes widths and do not overlap
+  DejaVu Sans       default figure 560 x 420  rule: font 7.3 pt, widest 1.13 axes widths, gap 30.8 | corrected: font 7.3 pt, widest 1.13, gap 30.8
+  [PASS] titles are at most 1.15 axes widths and do not overlap
+  DejaVu Sans Mono  README export 864 x 475   rule: font 11.3 pt, widest 1.25 axes widths, gap 29.0 | corrected: font 10.3 pt, widest 1.15, gap 41.0
+  [PASS] titles are at most 1.15 axes widths and do not overlap
+  DejaVu Sans Mono  default figure 560 x 420  rule: font 7.3 pt, widest 1.25 axes widths, gap 18.9 | corrected: font 6.7 pt, widest 1.15, gap 26.8
+  [PASS] titles are at most 1.15 axes widths and do not overlap
+  [PASS] the correction is used for the monospaced font
+
+=== 5. Random parameter values (2,000 sets, magnitudes 1e-6 to 1e9, 5% negative), rendered at two figure sizes
+  overlapping or clipped layouts: 0 of 4000 | smallest gap 24.4 pt | widest title 1.04 axes widths (panels are 1.32 axes widths apart) | smallest font 6.8 pt
+  [PASS] no overlap in any random layout
+
+ALL CHECKS PASSED
