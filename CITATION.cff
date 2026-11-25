@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "GrowthPredict Toolbox"
-version: v1.0.2
-date-released: 2026-09-29
+version: v1.1.0
+date-released: 2026-11-25
 license: GPL-3.0-only
 repository-code: "https://github.com/gchowell/GrowthPredict-Toolbox"
 authors:
