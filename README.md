@@ -130,7 +130,7 @@ The model evolves a cumulative state $C(t)$. The solver returns interval inciden
 | 4 | `'RICH'` | Richards | $rC[1-(C/K)^a]$ |
 | 5 | `'GOM'` | Gompertz with time-dependent growth rate | $rC\exp(-at)$ |
 
-Here $r$ sets the growth scale, $p$ is the growth exponent, $K$ is the saturation level in the logistic and Richards families, and $a$ controls shape or, for Gompertz, the decay of the growth rate. Parameter exports use a common set of columns. Interpret only parameters estimated for the selected model and error distribution.
+Here $r$ sets the growth scale, $p$ is the growth exponent, $K$ is the saturation level in the logistic and Richards families, and $a$ controls shape or, for Gompertz, the decay of the growth rate. In the Gompertz model $t$ is the time since the first observation of the window, so $r$ is the growth rate at the start of the window; earlier versions used the time labels as they are, which made $r$ depend on where the window starts and limited the fit for later windows. Parameter exports use a common set of columns. Interpret only parameters estimated for the selected model and error distribution.
 
 ## Fitting and uncertainty
 
@@ -148,7 +148,7 @@ For likelihood fits, the options functions set `dist1` automatically. For least 
 
 ### Optimization and bootstrap
 
-The optimizer searches the free parameters in scaled coordinates, using a log scale for positive free $r$, $K$ and $\alpha$ by default. For the observed data, `numstartpoints` sets the number of starts distributed across the parameter bounds. The solver adds the initial guess and up to three perturbations of it. If a data-derived bound limits $r$, the solver can retry with wider bounds and retain an improved fit. [Optimizer](forecasting_growthmodels%20code/fit_model.m)
+The optimizer searches the free parameters in scaled coordinates, using a log scale for positive free $r$, $K$ and $\alpha$ by default. For the observed data, `numstartpoints` sets the number of starts distributed across the parameter bounds. The solver adds the initial guess and up to three perturbations of it. The bounds of $r$ depend on the model. When $p$ is estimated (generalized growth, generalized logistic and generalized Richards), $r$ has units of cases$^{1-p}$ per unit time and is searched between $10^{-4}$ and 10 times the largest observation in the window. When $p$ is fixed at 1, $r$ is searched within a factor of 20 of the early slope of log incidence, and if that bound limits the fit the solver retries with wider bounds and retains an improved fit. To set the interval yourself, pass a struct as the last argument of either runner, for example `Run_Fit_GrowthModels(1, 1, 20, [], struct('rBounds', [1e-3 50]))`. [Optimizer](forecasting_growthmodels%20code/fit_model.m)
 
 For each window, the runner generates `B` simulated calibration datasets and refits each one using the observed-data estimate and its final bounds. Each refit starts from that estimate, a perturbed copy and one start distributed across the bounds. The 2.5th and 97.5th percentiles of the refitted parameters give the parameter intervals. For prediction, each refitted trajectory supplies 20 additional draws of observation noise. The first value is held fixed when generating each noisy trajectory.
 
@@ -211,15 +211,15 @@ The console reports requested, accepted and unresolved bootstrap fits. Acceptanc
 
 ## Reproduction numbers and doubling times
 
-The growth-model plots also export `doublingtimes-*.csv` from the fitted calibration trajectories. Each row describes a successive doubling of cumulative incidence, with its mean elapsed time, percentile limits and the fraction of bootstrap trajectories reaching that doubling.
+The growth-model plots also export `doublingtimes-*.csv` from the fitted calibration trajectories. Each row describes a successive doubling of cumulative incidence, with its mean elapsed time, percentile limits and the fraction of bootstrap trajectories reaching that doubling. The count that doubles is that of the series: the cases reported before the window are added to the fitted trajectory, so a window in which incidence is falling shows few doublings or none (a row of `NaN` with fraction 0). Earlier versions restarted the count at the first observation of each window, which gave short doubling times for any window not starting at the first row; rerun those. The first doublings of a series are short for the same reason when it begins after the outbreak did.
 
-To estimate the effective reproduction number $R_t$, first run the matching fit or forecast. The final argument to each plotting function is an options function, such as `@options_Rt`. It takes no inputs and returns `[type_GId1, mean_GI1, var_GI1]`. To use different settings, copy the options function and pass its handle. [Generation-interval options](forecasting_growthmodels%20code/options_Rt.m)
+To estimate the effective reproduction number $R_t$, first run the matching fit or forecast. The final argument to each plotting function is an options function, such as `@options_Rt`. It takes no inputs and returns `[type_GId1, mean_GI1, var_GI1]`. To use different settings, copy the options function and pass its handle. The default matches the default data file: the serial interval of mpox estimated from U.S. case pairs by symptom onset, a gamma distribution with mean 8.5 days and SD 5.0 days, written in weeks ([Madewell et al., 2023](https://doi.org/10.3201/eid2904.221622)). Earlier versions used mean 5 days and SD 8 days, the serial interval commonly assumed for cholera, which is now in `options_Rt_cholera.m`; with it the mpox estimates lie closer to 1. [Generation-interval options](forecasting_growthmodels%20code/options_Rt.m)
 
 | `type_GId1` | Generation interval | Settings used |
 | ---: | --- | --- |
 | 1 | Gamma | Mean in observation-time units and variance in squared units |
 | 2 | Exponential | Mean in observation-time units |
-| 3 | Fixed | A positive lag in multiples of 0.01 observation-time units |
+| 3 | Fixed | A lag of at least 0.01 observation-time units, rounded to the nearest 0.01 |
 
 ```matlab
 plotFit_ReproductionNumber(1, 1, 20, @options_fit, @options_Rt);
@@ -230,11 +230,13 @@ plotForecast_ReproductionNumber(1, 1, 20, 4, @options_forecast, @options_Rt);
   <img src="docs/images/Rt.png" alt="Fitted incidence above the effective reproduction number with its 95% interval" width="75%">
 </p>
 
-*Output of `plotFit_ReproductionNumber` for the fit-only example. **Top:** observations and fitted trajectories. **Bottom:** median $R_t$ (solid red) with its 95% interval (red dashed), the threshold $R_t = 1$ and the end of the calibration window (black dashed lines).*
+*Output of `plotFit_ReproductionNumber` for the fit-only example. **Top:** observations and fitted trajectories. **Bottom:** median $R_t$ (solid red) with its 95% interval (red dashed), the threshold $R_t = 1$ and the end of the calibration window (black dashed lines). The curve starts where the incidence history covers 95% of the generation-interval distribution.*
 
-The renewal calculation interpolates incidence on a 0.01-unit grid and uses the incidence history within the window. The gamma and exponential routines evaluate their distribution on the supplied time axis, so use a window starting at time zero to interpret the grid as elapsed lag. For a fixed lag $g$, the estimate is $I(t)/I(t-g)$ wherever the lagged incidence is available and positive. Earlier versions of `get_Rt.m` placed the fixed lag one grid step late. [Renewal calculation](forecasting_growthmodels%20code/get_Rt.m)
+The renewal calculation interpolates incidence on a 0.01-unit grid and uses the incidence history within the window. The generation interval is measured as elapsed time from the start of the window, so the estimate does not depend on the time label of the first observation. For a fixed lag $g$, the estimate is $I(t)/I(t-g)$ wherever the lagged incidence is available and positive. Because incidence before the window is not used, estimates near the start of a window are too high. The third output of `get_Rt` gives the fraction of the generation-interval distribution that the available history covers, and the plots and the `Rt-*.csv` export leave out the estimates for which it is below 95% (the first two weeks of a window with the default settings). With a heavy-tailed generation interval and falling incidence, estimates just above that threshold can still be 10% to 20% too high; the coverage is exported so that a stricter cut can be applied. [Renewal calculation](forecasting_growthmodels%20code/get_Rt.m) · [Row selection](forecasting_growthmodels%20code/selectRtRows.m)
 
-For exact timing, pair the values returned by `get_Rt` with `ts(2:end)`. In the `Rt-*.csv` export, the time labels before the final row are 0.01 units earlier than the corresponding estimates.
+Earlier versions of `get_Rt.m` evaluated the gamma and exponential distributions at the time labels themselves, which gave values far too large for any window not starting at time zero, and placed the fixed lag one grid step late. Rerun $R_t$ results from rolling windows, or from series whose time index does not start at zero, that were produced with those versions.
+
+Pair the values returned by `get_Rt` with `ts(2:end)`. The `Rt-*.csv` export has one row per unit of time after the start of the window, labelled with the time each estimate refers to, and ends with the last time of the window. Rows below the 95% coverage threshold are omitted, and the last column gives the coverage of each remaining row. If no time in the window reaches the threshold, the file holds the last time alone and a warning is issued.
 
 ## Reproducibility and support
 
@@ -249,6 +251,13 @@ After the full run, `make_readme_figures(false)` redraws the figures from the sa
 Record the repository revision (`git rev-parse HEAD`), MATLAB and toolbox versions (`ver`), input data, options functions, window arguments and random seed. Output filenames omit the seed, `B` and some optimizer settings, so archive results before rerunning with those settings changed. The repository also includes historical outputs.
 
 If plotting cannot find a MAT file, check that the runner and plotter use the same working folder, options, window range and horizon. To report an issue, include the commands, relevant options, error or warning text and a small shareable example. For a code contribution, describe the expected behavior and include a regression test. [GitHub Issues](https://github.com/gchowell/GrowthPredict-Toolbox/issues)
+
+The regression tests are in the `tests` folder of the code folder. Run them from the code folder; they need the toolboxes listed under Installation and take a few seconds. The changes in each version, and which earlier results to rerun, are listed in the changelog. The validation notes compare the toolbox with independent Python re-implementations of the fit, the renewal calculation and the doubling times. [Changelog](CHANGELOG.md) · [Validation notes](docs/validation/README.md)
+
+```matlab
+results = runtests('tests');
+table(results)
+```
 
 ## Citation and license
 
