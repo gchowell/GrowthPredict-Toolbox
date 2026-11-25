@@ -1,6 +1,6 @@
 # Titles of the parameter histograms: change and test results
 
-Base commit: `664ff0f`, after the other v1.1.0 changes. The checks below were run on 25 Nov 2026 with a Python port of the title text and font-size rule (`python/title_port.py`) and text rendered by matplotlib, not in MATLAB. The 11 tests of `tests/test_parameterTitle.m` have not been run in MATLAB yet; the MATLAB files were parsed with MISS_HIT (`mh_lint`), which found no errors.
+Base commit: `664ff0f`, after the other v1.1.0 changes. The checks below were run on 25 Nov 2026 with a Python port of the title text and font-size rule (`python/title_port.py`) and text rendered by matplotlib, not in MATLAB. In MATLAB, the ten tests of `tests/test_parameterTitle.m` pass, including those that measure the rendered titles, and `docs/images/fit.png` and `forecast.png` were regenerated with the new titles; see [README.md](README.md).
 
 ## The problem
 
@@ -16,7 +16,7 @@ The top row of the fit and forecast figures has four histograms (`r`, `p`, `a`, 
 | `Run_Fit_GrowthModels.m`, `Run_Forecasting_GrowthModels.m`, `plotFit_GrowthModels.m`, `plotForecast_GrowthModels.m`, `plotFit_ReproductionNumber.m`, `plotForecast_ReproductionNumber.m` | `title(cad1)` to `title(cad4)` replaced by `setParameterTitle('r',param_r(1,1:3))` and so on, placed after the line that sets the axes font size. |
 | `Run_Fit_GrowthModels.m`, `Run_Forecasting_GrowthModels.m` | Semicolons after `cad1` to `cad6` and after `line1=plot(...)`, which printed to the console. The `cad` variables are still created and saved. |
 | `make_readme_figures.m` | Sizes the titles again after it resizes a figure for export. |
-| `tests/test_parameterTitle.m` | Eleven tests (new file). |
+| `tests/test_parameterTitle.m` | Ten tests (new file). |
 
 ### Font size
 
@@ -77,9 +77,8 @@ Two thousand sets of four parameters with magnitudes from 1e-6 to 1e9, 5% of the
 
 - **Small titles in small windows.** In the default 560 × 420 figure the titles are 7 to 9 points, next to tick labels of 24 points. Four panels of that width leave no room for more; enlarging the figure enlarges the titles, up to 18 points.
 - **Other text.** Axis labels and tick labels keep the font size of `GetAdjustedFontSize`. They were not changed.
-- **Not checked in MATLAB.** The positions and text widths above come from matplotlib. MATLAB may narrow an axes to make room for its tick labels; the rule uses the width MATLAB reports, and `tests/test_parameterTitle.m` measures the rendered titles in MATLAB.
+- **Numbers from matplotlib.** The gaps and font sizes above come from matplotlib, not MATLAB. MATLAB may narrow an axes to make room for its tick labels; the rule uses the width MATLAB reports. In MATLAB the layout is checked by `tests/test_parameterTitle.m`, which measures the rendered titles at three figure sizes.
 - **Figures drawn before this change** and saved as `.fig` keep their old titles.
-- **`docs/images/fit.png` and `forecast.png`** have to be regenerated with `make_readme_figures`.
 
 ## Reproducing
 
