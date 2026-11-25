@@ -20,6 +20,7 @@ Versions follow the tags of this repository. Entries list what changed for a use
 - **Doubling times** (`getDoublingTimeCurve.m` and the four plotting functions). The count that doubles is the cumulative count of the series: cases before the window are included. A window with falling incidence now reports few doublings or none.
 - **Mean doubling time** in the plotting functions leaves out bootstrap trajectories without a doubling instead of returning `NaN`.
 - **Time origin of the Gompertz model** (`growthIncidenceCurve.m`). In `dC/dt = r*C*exp(-a*t)`, `t` is now the time since the first observation of the window, so `r` is the growth rate at the start of the window. Before, the time labels were used as they are: the same observations with a later first label needed a larger `r`, which reached its upper bound for later windows. The Gompertz bounds are also divided by `DT`.
+- **Titles of the parameter histograms** (`r`, `p`, `a`, `K`; both runners and the four plotting functions). The estimate and its 95% CI are written on two lines, in normal weight, at a font size that follows the width of the panel, for example `r = 1.73` over `95% CI (1.49, 2.08)`. Before, each title was one bold line at about 26 points, wider than its panel, and the four titles ran into each other. Numbers now have three significant digits instead of two, and no exponent below one million (`K = 28500`, before `K=2.9e+04`).
 
 ### Fixed
 
@@ -31,6 +32,7 @@ Versions follow the tags of this repository. Entries list what changed for a use
 - **`options_Rt_cholera.m`** declared a function named `options_Rt`.
 - **`getDoublingTimeCurve.m`** left its outputs unassigned for a curve of one point.
 - **`plotFit_ReproductionNumber.m`** printed the axis limits to the console.
+- **`Run_Fit_GrowthModels.m` and `Run_Forecasting_GrowthModels.m`** printed the title strings (`cad1` to `cad6`) and the handle of each plotted line to the console.
 
 ### Added
 
@@ -38,7 +40,8 @@ Versions follow the tags of this repository. Entries list what changed for a use
 - **Third output of `get_Rt.m`,** `giCoverage`: the fraction of the generation-interval distribution covered by the incidence history at each estimate.
 - **`selectRtRows.m`** selects the estimates with enough history.
 - **Fourth input of `getDoublingTimeCurve.m`,** `priorCumulative`: cases counted before the first point of the curve.
-- **Regression tests** in `forecasting_growthmodels code/tests` (39 tests in six files); run `runtests('tests')` from the code folder.
+- **`setParameterTitle.m`, `parameterTitleText.m` and `fitParameterTitles.m`** write and size the titles of the parameter histograms. `fitParameterTitles(fig)` can be called after resizing a figure from a script; figures resized by hand follow on their own.
+- **Regression tests** in `forecasting_growthmodels code/tests` (50 tests in seven files); run `runtests('tests')` from the code folder.
 - **Validation notes** in `docs/validation`, with the Python re-implementations used to check each change.
 - **This changelog.**
 
