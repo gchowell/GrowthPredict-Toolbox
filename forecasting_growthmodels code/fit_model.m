@@ -24,6 +24,11 @@ function [P,residual,fitcurve,forecastcurve,timevect2,initialguess,fval,flagg,fi
 %                           from data1, and make params0 the seed as given.
 %                           The runners pass the bounds of the fit to the
 %                           observed data to every bootstrap refit (see below).
+%     fitopts.rBounds       [lower upper], 0 < lower <= upper: replaces the
+%                           interval of r derived from data1 (any model) and
+%                           switches off the retry with a wider interval. The
+%                           runners accept it through their last input, e.g.
+%                           Run_Fit_GrowthModels(1,1,20,[],struct('rBounds',[1e-3 50])).
 %
 %   Optional 9th output FITDIAGNOSTICS: bounds, convergence flags, the share of
 %   converged starts that agree with the best one (startAgreement) and which
@@ -54,8 +59,10 @@ function [P,residual,fitcurve,forecastcurve,timevect2,initialguess,fval,flagg,fi
 %   growthObjective at the returned P.
 %
 %   Bounds of bootstrap refits. The bounds of r and K are derived from the data
-%   (r within a factor 20 of the slope of log incidence over the first 7 points,
-%   K at or above the cumulative count). Recomputed for every bootstrap
+%   (r from the largest observation, or, for the models with p fixed at 1, within
+%   a factor 20 of the slope of log incidence over the first 7 points; K at or
+%   above the cumulative count). At the time of this note every model used the
+%   slope. Recomputed for every bootstrap
 %   replicate, the r interval is driven by the noise in 7 small counts, and for
 %   some replicates it excluded the fitted r altogether (about 4% of replicates
 %   of the shipped series curve-GLM...dist1-1-factor1-1, where r was then pinned
@@ -63,14 +70,52 @@ function [P,residual,fitcurve,forecastcurve,timevect2,initialguess,fval,flagg,fi
 %   the box of the observed-data fit, as in QuantDiffForecast, and start from
 %   the supplied params0 (the best fit) instead of a re-derived r.
 %
-%   Binding interval for r. For the fit to the observed data the same data-derived
-%   interval can exclude the right growth rate (1 of 60 simulated GLM series in
+%   Binding interval for r (EXP, LM, RICH: p fixed at 1). For the fit to the
+%   observed data the slope-derived interval can exclude the right growth rate (1 of 60 simulated GLM series in
 %   the tests: r in [4e-5, 0.017] for a true r of 0.18). When the fit ends on that
 %   bound it is repeated once with r in [1e-3, 10]; see the block after the final
 %   evaluation and fitDiagnostics.rBoundsWidened.
 %
 %   Logistic model with fixI0 = 0: the unused exponent a had bounds [1 10] and
 %   was therefore estimated; it is now fixed at 1 like in the fixI0 = 1 case.
+%
+%   Interval for r when p is estimated (GGM, GLM, GRM). In dC/dt = r*C^p*(...)
+%   the unit of r is cases^(1-p)/time. The slope of log incidence has unit 1/time,
+%   so [slope/20, 20*slope], and the fallback [1e-3, 10], describe r only when
+%   p = 1. A window that starts inside an epidemic has C(0) equal to its first
+%   observation and can only level off or decline with a small p, which needs
+%   r of the order of the incidence itself. For these three models the interval
+%   is now
+%
+%       r in [1e-4, 10*max(y)] / DT.
+%
+%   Reason for the upper end: K is at least the cumulative count of the window,
+%   so while C is below half of that count, 1 - C/K >= 1/2, and C^p >= 1 once
+%   C >= 1; there r <= 2*dC/dt, hence r <= 2*max(dC/dt) for GGM and GLM, and
+%   10 leaves a factor 5. EXP, LM, RICH and GOM are unchanged.
+%
+%   Compared with a Python port of this function (same models, objectives, box,
+%   seed and start points; scipy in place of fmincon) on 149 windows of 18
+%   bundled series, least squares and Poisson, fixI0 = 1 (894 fits); see
+%   docs/validation. tests/test_rInterval.m checks the result in MATLAB. With the former interval r ended on its upper bound in 450 fits and
+%   the new interval gave a lower objective in 411 of them (435 of 894 overall,
+%   1 higher by 0.2%, 458 equal). In the GGM and GLM fits r never exceeded
+%   2.2*max(y). GRM: r still reached the upper bound in 28 of 298 fits, all with
+%   a < 0.2, because r and a trade off as a -> 0 (r*(1-(C/K)^a) -> r*a*log(K/C));
+%   read r and a of such a fit together. With r free, p reached its lower bound
+%   0.01 in 30% of the fits (6% before), mostly GGM on windows that level off or
+%   decline, which that model cannot follow; the runners warn about it.
+%
+%   Gompertz model (GOM). Time is measured from the first observation of the
+%   window (see growthIncidenceCurve.m), so r is the growth rate at the start of
+%   the window and does not depend on the time label of the first observation.
+%   The intervals of r and a still come from initialParams.m (a factor 10 either
+%   side of its guesses) and are now divided by DT. In the Python comparison of
+%   docs/validation (298 Gompertz fits) r ended on its upper bound in 153 fits
+%   before this change, all in windows whose first time label is not zero, and
+%   in none after it. A wider interval for a was tried and not adopted: it
+%   lowered the objective in 17 fits by letting a go to zero, and made the
+%   four-step forecast worse in 15 of them.
 
 global flag1 method1 timevect ydata
 
@@ -151,6 +196,17 @@ else
     end
 end
 
+% Models with a free growth exponent p (GGM, GLM, GRM): r has units of
+% cases^(1-p)/time, so an interval taken from the slope of log incidence
+% (units 1/time) is only meaningful for p = 1. The interval is taken from the
+% scale of the data instead; r0 above is kept as the seed. See the header,
+% 'Interval for r when p is estimated'.
+if any(flag1 == [0 1 2])
+    ymax = max(max(data1(:,2)), 1);
+    rlb  = 1e-4/DT;
+    rub  = 10*ymax/DT;
+end
+
 Cobs = sum(abs(data1(:,2)));
 Klb  = max(20, Cobs);            % can't undershoot observed cumulative
 Kub  = min(1e3*Cobs, 1e9);       % capped
@@ -184,9 +240,9 @@ if fixI0==1
             LB=[rlb  1 0 Klb I0 LBe];
             UB=[rub  1 10 Kub I0 UBe];
 
-        case 5 % Gompertz
-            LB=[max(1e-4, params0(1)/10)  1 max(1e-6, params0(3)/10) 1 I0 LBe];
-            UB=[params0(1)*10             1 params0(3)*10            1 I0 UBe];
+        case 5 % Gompertz: r and a are rates, so the bounds are per unit of time
+            LB=[max(1e-4, params0(1)/10)/DT  1 max(1e-6, params0(3)/10)/DT 1 I0 LBe];
+            UB=[params0(1)*10/DT             1 params0(3)*10/DT            1 I0 UBe];
 
         otherwise
             error('GrowthPredict:fit_model:UnknownModel', ...
@@ -229,9 +285,9 @@ else
             LB=[rlb  1 0 Klb I0lb LBe];
             UB=[rub  1 10 Kub I0ub UBe];
 
-        case 5 % Gompertz
-            LB=[max(1e-4, params0(1)/10)  1 max(1e-6, params0(3)/10) 1 I0lb LBe];
-            UB=[params0(1)*10             1 params0(3)*10            1 I0ub UBe];
+        case 5 % Gompertz: r and a are rates, so the bounds are per unit of time
+            LB=[max(1e-4, params0(1)/10)/DT  1 max(1e-6, params0(3)/10)/DT 1 I0lb LBe];
+            UB=[params0(1)*10/DT             1 params0(3)*10/DT            1 I0ub UBe];
 
         otherwise
             error('GrowthPredict:fit_model:UnknownModel', ...
@@ -241,8 +297,23 @@ else
 
 end
 
+% Caller-supplied interval for r (fitopts.rBounds): replaces the interval derived
+% above, for every model, and switches off the retry with a wider interval.
+rBoundsUser = isstruct(fitopts) && isfield(fitopts,'rBounds') && ~isempty(fitopts.rBounds);
+if rBoundsUser
+    rb = fitopts.rBounds;
+    if ~isnumeric(rb) || numel(rb)~=2 || ~all(isfinite(rb)) || rb(1)<=0 || rb(1)>rb(2)
+        error('GrowthPredict:fit_model:rBounds', ...
+            'fitopts.rBounds must be [lower upper] with 0 < lower <= upper.');
+    end
+    LB(1) = rb(1);
+    UB(1) = rb(2);
+end
+
 if flag1 ~= 5
     z(1) = min(max(r0, LB(1)), UB(1));   % informed r guess
+else
+    z([1 3]) = params0([1 3])/DT;        % Gompertz guesses of initialParams.m are per observation step
 end
 
 % Caller-supplied box (bootstrap refits): use it as is and keep params0 as the seed.
@@ -475,7 +546,7 @@ atUB(free)=P(free)>=UB(free)-tolB*abs(UB(free));
 % from the current solution with r allowed in [1e-3, 10] (the default interval
 % used when there is no growth signal) and keep the result if it is better. The
 % widened bounds are returned in fitDiagnostics, so bootstrap refits use them too.
-if ~boundsSupplied && flag1~=5 && (atLB(1) || atUB(1)) && (LB(1)>1e-3 || UB(1)<10)
+if ~boundsSupplied && ~rBoundsUser && flag1~=5 && (atLB(1) || atUB(1)) && (LB(1)>1e-3 || UB(1)<10)
 
     wideopts=fitopts;
     if ~isstruct(wideopts)

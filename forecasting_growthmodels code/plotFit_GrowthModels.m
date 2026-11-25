@@ -327,13 +327,18 @@ for i=tstart1:1:tend1 %rolling window analysis
 
         meandoublingtime=[];
 
+        % Doubling times refer to the cumulative count of the series, so the cases
+        % reported before the window are added (see getDoublingTimeCurve.m). Without
+        % them the count restarts at every window.
+        priorCumulative1=sum(max(data(1:i-1,2),0),'omitnan');
+
         doublingtimess=zeros(30,M)+NaN;
 
         maxd=1;
 
         for j=1:M
 
-            [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(max(fit_model1(:,j),0),DT,0);
+            [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(max(fit_model1(:,j),0),DT,0,priorCumulative1);
 
             doublingtimess(1:length(doublingtimes),j)=doublingtimes;
 
@@ -359,7 +364,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         seq_doublingtimes % [ith doubling, mean, 95%CI LB, 95%CI UB, prob. i_th doubling]
 
         % Mean doubling times
-        dmean=mean(meandoublingtime);
+        dmean=mean(meandoublingtime,'omitnan'); % trajectories without a doubling are left out
         dLB=quantile(meandoublingtime,0.025);
         dUB=quantile(meandoublingtime,0.975);
 

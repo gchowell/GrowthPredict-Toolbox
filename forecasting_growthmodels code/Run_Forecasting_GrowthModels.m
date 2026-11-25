@@ -1,4 +1,4 @@
-function   [AICcs,forecast_model1]=Run_Forecasting_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass,options_pass)
+function   [AICcs,forecast_model1]=Run_Forecasting_GrowthModels(tstart1_pass,tend1_pass,windowsize1_pass,forecastingperiod_pass,options_pass,fitopts_pass)
 
 % <============================================================================>
 % < Author: Gerardo Chowell  ==================================================>
@@ -68,6 +68,18 @@ numstartpoints=numstartpoints_INP; % Number of initial guesses for optimization 
 numstartpoints_boot=1; % Box-wide start points for each bootstrap refit (a jittered copy of the best fit and the best fit itself are always added)
 
 fitopts=struct('logscale',true,'useParallel',false); % optimizer settings, see fit_model.m
+
+% Optional last input: a struct whose fields are added to (or replace) the optimizer
+% settings above, e.g. struct('rBounds',[1e-3 50]) to set the interval of r (see fit_model.m).
+if exist('fitopts_pass','var')==1 && ~isempty(fitopts_pass)
+    if ~isstruct(fitopts_pass)
+        error('GrowthPredict:fitopts','fitopts_pass must be a struct, e.g. struct(''rBounds'',[1e-3 50]).');
+    end
+    fitoptsNames=fieldnames(fitopts_pass);
+    for kopt=1:numel(fitoptsNames)
+        fitopts.(fitoptsNames{kopt})=fitopts_pass.(fitoptsNames{kopt});
+    end
+end
 
 M=M_INP; % number of bootstrap realizations to characterize parameter uncertainty
 

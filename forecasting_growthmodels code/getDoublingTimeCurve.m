@@ -1,6 +1,46 @@
-function [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(curve,DT,print1)
+function [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(curve,DT,print1,priorCumulative)
 
-dt1=0.01; 
+% GETDOUBLINGTIMECURVE  Successive doubling times of cumulative incidence.
+%
+%   [tds,C0data,curve,doublingtimes] = getDoublingTimeCurve(curve,DT,print1)
+%   [tds,C0data,curve,doublingtimes] = getDoublingTimeCurve(curve,DT,print1,priorCumulative)
+%
+% Inputs
+%   curve            incidence at successive time points (column)
+%   DT               time between points
+%   print1           1 to plot the cumulative curve and the doubling times
+%   priorCumulative  cases counted before the first point of the curve
+%                    (default 0). For a window that starts inside a series,
+%                    pass the sum of the observations before the window.
+%
+% Outputs
+%   tds            rows [time, cumulative count] at the start and at each doubling
+%   C0data         cumulative count at the first point
+%   curve          cumulative curve at the time points, [time, count]
+%   doublingtimes  time taken by each successive doubling; empty when the
+%                  count does not double within the curve
+%
+% The count that doubles is priorCumulative + cumsum(curve). Without
+% priorCumulative the count restarts at the first point of the curve, so a
+% window taken from the middle of an epidemic shows short 'doublings' of its
+% own running total, even when incidence is falling.
+
+dt1=0.01;
+
+if nargin<4 || isempty(priorCumulative)
+    priorCumulative=0;
+end
+
+if ~isscalar(priorCumulative) || ~isfinite(priorCumulative) || priorCumulative<0
+    error('GrowthPredict:getDoublingTimeCurve:priorCumulative', ...
+        'priorCumulative must be a number that is zero or positive.');
+end
+
+tds=[];
+C0data=[];
+doublingtimes=[];
+
+curve=curve(:);
 
 data=[(0:1:length(curve)-1)' curve];
 
@@ -13,7 +53,7 @@ I0=data(1,2); % initial condition
 
 [max1,index1]=max(data(:,2));
 
-cumdata=cumsum(data(:,2));
+cumdata=priorCumulative+cumsum(data(:,2));
 
 cum1=cumdata(end);
 %
@@ -23,7 +63,7 @@ tb=data(:,1);
 
 tb=tb*DT;
 
-cumulative1=cumsum(data(:,2));
+cumulative1=priorCumulative+cumsum(data(:,2));
 
 C0data=cumulative1(1);
 

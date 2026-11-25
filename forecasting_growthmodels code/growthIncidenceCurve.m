@@ -17,6 +17,13 @@ function [incidence, C] = growthIncidenceCurve(z, tvec, flag1)
 %   is incomplete or returns non-finite / complex values; growthObjective turns
 %   that into Inf for the optimizer, and fit_model lets it surface for the
 %   final curve, so a failed solve can never be saved as a fitted curve.
+%
+%   Gompertz model. Its growth rate r*exp(-a*t) depends on time, unlike the other
+%   models, so the time origin matters. Time is measured from tvec(1): r is the
+%   growth rate at the first point of the curve, whatever its time label. Until
+%   this version the time labels were used as they are, so the same observations
+%   labelled from 12 instead of 0 needed an r larger by exp(12*a), which pushed r
+%   onto its upper bound for windows starting later in a series.
 
 tvec = tvec(:);
 if numel(tvec) < 3
@@ -24,6 +31,10 @@ if numel(tvec) < 3
     % of the two requested points.
     error('GrowthPredict:growthIncidenceCurve:TooFewTimes', ...
         'At least 3 time points are needed (got %d).', numel(tvec));
+end
+
+if flag1 == 5
+    tvec = tvec - tvec(1);   % elapsed time; the other models do not depend on t
 end
 
 r = z(1); p = z(2); a = z(3); K = z(4); I0 = z(5);

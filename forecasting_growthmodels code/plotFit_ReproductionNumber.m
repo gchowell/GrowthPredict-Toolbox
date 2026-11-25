@@ -349,13 +349,18 @@ for i=tstart1:1:tend1 %rolling window analysis
 
         meandoublingtime=[];
 
+        % Doubling times refer to the cumulative count of the series, so the cases
+        % reported before the window are added (see getDoublingTimeCurve.m). Without
+        % them the count restarts at every window.
+        priorCumulative1=sum(max(data(1:i-1,2),0),'omitnan');
+
         doublingtimess=zeros(30,M)+NaN;
 
         maxd=1;
 
         for j=1:M
 
-            [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(max(fit_model1(:,j),0),DT,0);
+            [tds,C0data,curve,doublingtimes]=getDoublingTimeCurve(max(fit_model1(:,j),0),DT,0,priorCumulative1);
 
             doublingtimess(1:length(doublingtimes),j)=doublingtimes;
 
@@ -381,7 +386,7 @@ for i=tstart1:1:tend1 %rolling window analysis
         seq_doublingtimes % [ith doubling, mean, 95%CI LB, 95%CI UB, prob. i_th doubling]
 
         % Mean doubling times
-        dmean=mean(meandoublingtime);
+        dmean=mean(meandoublingtime,'omitnan'); % trajectories without a doubling are left out
         dLB=quantile(meandoublingtime,0.025);
         dUB=quantile(meandoublingtime,0.975);
 
@@ -437,7 +442,7 @@ for i=tstart1:1:tend1 %rolling window analysis
     Rss=[];
 
     for realization1=1:M
-        [Rs,ts]=get_Rt(timevect2,fit_model1(:,realization1),type_GId1,mean_GI1,var_GI1);
+        [Rs,ts,giCoverage]=get_Rt(timevect2,fit_model1(:,realization1),type_GId1,mean_GI1,var_GI1);
 
         Rss=[Rss Rs];
     end
@@ -449,6 +454,31 @@ for i=tstart1:1:tend1 %rolling window analysis
     Rtmedian=quantile(Rss',0.5);
     RtLB=quantile(Rss',0.025);
     RtUB=quantile(Rss',0.975);
+
+    % Estimates near the start of the window are too high, because the incidence
+    % before the window is not used (see get_Rt.m). Show and export those for which
+    % the history covers at least minCoverageRt of the generation-interval distribution.
+    minCoverageRt=0.95;
+
+    [idxRt,reliableRt]=selectRtRows(giCoverage,minCoverageRt,100);
+
+    tsRt=ts(2:end);
+
+    shownRt=reliableRt(:)';
+
+    if ~any(shownRt)
+        warning('GrowthPredict:Rt:coverage', ...
+            'The window is too short for this generation interval: the incidence history never covers %g%% of its distribution. The R_t estimates, including the one at the last time, are too high.', 100*minCoverageRt);
+        shownRt(:)=true;
+    end
+
+    RtYmax=max(RtUB(shownRt),[],'omitnan');
+
+    if isempty(RtYmax) || ~isfinite(RtYmax)
+        RtYmax=2;
+    end
+
+    RtYmax=max(1.5,1.2*RtYmax);
 
     figure(500+cc1)
 
@@ -513,24 +543,23 @@ for i=tstart1:1:tend1 %rolling window analysis
     %plot(ts(2:end),Rss,'c-')
     %hold on
 
-    line1=plot(ts(2:end),Rtmedian,'r-');
+    line1=plot(tsRt(shownRt),Rtmedian(shownRt),'r-');
     set(line1,'LineWidth',2)
     hold on
 
-    line1=plot(ts(2:end),RtLB,'r--');
+    line1=plot(tsRt(shownRt),RtLB(shownRt),'r--');
     set(line1,'LineWidth',2)
-    line1=plot(ts(2:end),RtUB,'r--');
+    line1=plot(tsRt(shownRt),RtUB(shownRt),'r--');
     set(line1,'LineWidth',2)
 
-    line2=[0 1;ts(end) 1];
+    line2=[ts(1) 1;ts(end) 1];
     line1=plot(line2(:,1),line2(:,2),'k--');
     set(line1,'LineWidth',2)
 
-    [timevect1(1) timevect2(end) 0 quantile(Rss(end/2,:),0.975)+5]
 
-    axis([timevect1(1) timevect2(end) 0 quantile(Rss(end/2,:),0.975)+5])
+    axis([timevect1(1) timevect2(end) 0 RtYmax])
 
-    line2=[timevect1(end) 0;timevect1(end) quantile(Rss(end/2,:),0.975)+5];
+    line2=[timevect1(end) 0;timevect1(end) RtYmax];
     
     line1=plot(line2(:,1),line2(:,2),'k--');
     set(line1,'LineWidth',2)
@@ -548,11 +577,14 @@ for i=tstart1:1:tend1 %rolling window analysis
     % <============================== Save file with R_t estimates ======================================>
     % <=============================================================================================>
 
-    Rtdata=[ts(2:100:end)' Rtmedian(2:100:end)' RtLB(2:100:end)' RtUB(2:100:end)'];
-    Rtdata=[Rtdata;[ts(end)' Rtmedian(end)' RtLB(end)' RtUB(end)']];
+    % Rtmedian(k) is the estimate at ts(k+1) (see get_Rt.m). idxRt (selectRtRows.m,
+    % above) holds one row per unit of time after the start of the window, ending at
+    % the last time, without the rows whose history covers less than minCoverageRt
+    % of the generation-interval distribution. The last column gives that coverage.
+    Rtdata=[ts(idxRt+1)' Rtmedian(idxRt)' RtLB(idxRt)' RtUB(idxRt)' giCoverage(idxRt)];
 
     T = array2table(Rtdata);
-    T.Properties.VariableNames(1:4) = {'time','Rt median','Rt 95%CI LB','Rt 95% CI UB'};
+    T.Properties.VariableNames(1:5) = {'time','Rt median','Rt 95%CI LB','Rt 95% CI UB','GI coverage'};
     writetable(T,strcat('./output/Rt-flag1-',num2str(flag1),'-tstart-',num2str(i),'-fixI0-',num2str(fixI0),'-method-',num2str(method1),'-dist-',num2str(dist1),'-calibrationperiod-',num2str(windowsize1),'-horizon-',num2str(forecastingperiod),'-',caddisease,'-',datatype,'.csv'))
 
 

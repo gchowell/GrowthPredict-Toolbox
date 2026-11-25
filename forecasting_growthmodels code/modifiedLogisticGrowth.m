@@ -30,7 +30,7 @@ elseif flag1==4 %Richards
     
     dx(1,1)=r*x*(1-(x/K).^a);
 
-elseif flag1==5 % Gompertz
+elseif flag1==5 % Gompertz; t is the time since the first point (growthIncidenceCurve.m)
     
     dx(1,1)=r*x*exp(-a*t);
             
