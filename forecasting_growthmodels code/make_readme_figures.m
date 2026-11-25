@@ -144,6 +144,11 @@ pos = get(fig, 'Position');
 set(fig, 'Position', [pos(1:2) sizeIn], 'Color', 'white');
 drawnow
 
+% Parameter titles are sized to their panels; size them for the export size
+% in case the resize callback has not run yet (e.g. with -batch).
+fitParameterTitles(fig);
+drawnow
+
 file = fullfile(imgDir, name);
 
 if ~isempty(which('exportgraphics'))          % R2020a and later

@@ -575,15 +575,15 @@ for i=tstart1:1:tend1  %rolling window analysis
     MCSES=[MCSES;MCSE];
     SCIs=[SCIs;SCI];
 
-    cad1=strcat('r=',num2str(param_r(end,1),2),' (95% CI:',num2str(param_r(end,2),2),',',num2str(param_r(end,3),2),')')
-    cad2=strcat('p=',num2str(param_p(end,1),2),' (95% CI:',num2str(param_p(end,2),2),',',num2str(param_p(end,3),2),')')
+    cad1=strcat('r=',num2str(param_r(end,1),2),' (95% CI:',num2str(param_r(end,2),2),',',num2str(param_r(end,3),2),')');
+    cad2=strcat('p=',num2str(param_p(end,1),2),' (95% CI:',num2str(param_p(end,2),2),',',num2str(param_p(end,3),2),')');
 
-    cad3=strcat('a=',num2str(param_a(end,1),2),' (95% CI:',num2str(param_a(end,2),2),',',num2str(param_a(end,3),2),')')
-    cad4=strcat('K=',num2str(param_K(end,1),2),' (95% CI:',num2str(param_K(end,2),2),',',num2str(param_K(end,3),2),')')
+    cad3=strcat('a=',num2str(param_a(end,1),2),' (95% CI:',num2str(param_a(end,2),2),',',num2str(param_a(end,3),2),')');
+    cad4=strcat('K=',num2str(param_K(end,1),2),' (95% CI:',num2str(param_K(end,2),2),',',num2str(param_K(end,3),2),')');
 
-    cad5=strcat('alpha=',num2str(param_alpha(end,1),2),' (95% CI:',num2str(param_alpha(end,2),2),',',num2str(param_alpha(end,3),2),')')
+    cad5=strcat('alpha=',num2str(param_alpha(end,1),2),' (95% CI:',num2str(param_alpha(end,2),2),',',num2str(param_alpha(end,3),2),')');
 
-    cad6=strcat('d=',num2str(param_d(end,1),2),' (95% CI:',num2str(param_d(end,2),2),',',num2str(param_d(end,3),2),')')
+    cad6=strcat('d=',num2str(param_d(end,1),2),' (95% CI:',num2str(param_d(end,2),2),',',num2str(param_d(end,3),2),')');
 
 
     % Plot results
@@ -609,16 +609,15 @@ for i=tstart1:1:tend1  %rolling window analysis
         hold on
 
         line2=[param_r(1,2) 10;param_r(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
         addEstimateLine(param_r(1,1)); % fitted estimate (black dashed line)
 
         xlabel('r')
         ylabel('Frequency')
 
-        title(cad1)
-
         set(gca,'FontSize',GetAdjustedFontSize);
+        setParameterTitle('r',param_r(1,1:3)); % two lines, sized to the panel
         set(gcf,'color','white')
 
         subplot(2,4,2)
@@ -626,16 +625,15 @@ for i=tstart1:1:tend1  %rolling window analysis
         hold on
 
         line2=[param_p(1,2) 10;param_p(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
         addEstimateLine(param_p(1,1)); % fitted estimate (black dashed line)
 
         xlabel('p')
         ylabel('Frequency')
 
-        title(cad2)
-
         set(gca,'FontSize',GetAdjustedFontSize);
+        setParameterTitle('p',param_p(1,1:3)); % two lines, sized to the panel
         set(gcf,'color','white')
 
         subplot(2,4,3)
@@ -644,15 +642,15 @@ for i=tstart1:1:tend1  %rolling window analysis
         hold on
 
         line2=[param_a(1,2) 10;param_a(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
         addEstimateLine(param_a(1,1)); % fitted estimate (black dashed line)
 
         xlabel('a')
         ylabel('Frequency')
-        title(cad3)
 
         set(gca,'FontSize',GetAdjustedFontSize);
+        setParameterTitle('a',param_a(1,1:3)); % two lines, sized to the panel
         set(gcf,'color','white')
 
         subplot(2,4,4)
@@ -660,16 +658,15 @@ for i=tstart1:1:tend1  %rolling window analysis
         hold on
 
         line2=[param_K(1,2) 10;param_K(1,3) 10];
-        line1=plot(line2(:,1),line2(:,2),'r--')
+        line1=plot(line2(:,1),line2(:,2),'r--');
         set(line1,'LineWidth',2)
         addEstimateLine(param_K(1,1)); % fitted estimate (black dashed line)
 
         xlabel('K')
         ylabel('Frequency')
 
-        title(cad4)
-
         set(gca,'FontSize',GetAdjustedFontSize);
+        setParameterTitle('K',param_K(1,1:3)); % two lines, sized to the panel
         set(gcf,'color','white')
 
 
@@ -685,34 +682,34 @@ for i=tstart1:1:tend1  %rolling window analysis
         % plot 95% PI
 
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
 
         hold on
-        line1=plot(timevect2,LB1,'r--')
+        line1=plot(timevect2,LB1,'r--');
         set(line1,'LineWidth',2)
 
-        line1=plot(timevect2,UB1,'r--')
+        line1=plot(timevect2,UB1,'r--');
         set(line1,'LineWidth',2)
 
         % plot mean model fit
 
         color1=gray(8);
-        line1=plot(timevect1,fit_model1,'color',color1(6,:))
+        line1=plot(timevect1,fit_model1,'color',color1(6,:));
         set(line1,'LineWidth',1)
 
-        line1=plot(timevect2,median1,'r-')
+        line1=plot(timevect2,median1,'r-');
         set(line1,'LineWidth',2)
 
         % plot the data
 
-        line1=plot(timevect_all,data_all,'bo')
+        line1=plot(timevect_all,data_all,'bo');
         set(line1,'LineWidth',2)
 
         line2=[timevect1(end) 0;timevect1(end) max(quantile(forecast_model12',0.975))*1.5];
 
         if forecastingperiod>0
-            line1=plot(line2(:,1),line2(:,2),'k--')
+            line1=plot(line2(:,1),line2(:,2),'k--');
             set(line1,'LineWidth',2)
         end
 

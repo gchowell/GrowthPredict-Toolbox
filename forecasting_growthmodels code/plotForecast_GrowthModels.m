@@ -268,9 +268,8 @@ for i=tstart1:1:tend1  %rolling window analysis
     xlabel('r')
     ylabel('Frequency')
 
-    title(cad1)
-
     set(gca,'FontSize',GetAdjustedFontSize);
+    setParameterTitle('r',param_r(1,1:3)); % two lines, sized to the panel
     set(gcf,'color','white')
 
     subplot(2,4,2)
@@ -285,9 +284,8 @@ for i=tstart1:1:tend1  %rolling window analysis
     xlabel('p')
     ylabel('Frequency')
 
-    title(cad2)
-
     set(gca,'FontSize',GetAdjustedFontSize);
+    setParameterTitle('p',param_p(1,1:3)); % two lines, sized to the panel
     set(gcf,'color','white')
 
     subplot(2,4,3)
@@ -302,9 +300,9 @@ for i=tstart1:1:tend1  %rolling window analysis
 
     xlabel('a')
     ylabel('Frequency')
-    title(cad3)
 
     set(gca,'FontSize',GetAdjustedFontSize);
+    setParameterTitle('a',param_a(1,1:3)); % two lines, sized to the panel
     set(gcf,'color','white')
 
 
@@ -320,9 +318,8 @@ for i=tstart1:1:tend1  %rolling window analysis
     xlabel('K')
     ylabel('Frequency')
 
-    title(cad4)
-
     set(gca,'FontSize',GetAdjustedFontSize);
+    setParameterTitle('K',param_K(1,1:3)); % two lines, sized to the panel
     set(gcf,'color','white')
 
     % <========================================================================================>
