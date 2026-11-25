@@ -1,0 +1,44 @@
+Gompertz fits: 298 cases (149 windows of 18 series, least squares and Poisson); skipped 38; errors 0
+
+=== ALL: 298 cases
+  HEAD                    : best-known objective  40.9% | r on bound  51.3% (LB 0, UB 153) | a on bound   6.4% (LB 19, UB 0) | valid starts 100.0% | agreement 0.63 | agreement < 0.5: 34.2% | 0.08s
+  elapsed time (adopted)  : best-known objective  94.0% | r on bound   0.0% (LB 0, UB 0) | a on bound   5.7% (LB 17, UB 0) | valid starts 100.0% | agreement 0.97 | agreement < 0.5: 0.3% | 0.11s
+  elapsed time, wide box  : best-known objective  97.0% | r on bound   0.0% (LB 0, UB 0) | a on bound   4.0% (LB 12, UB 0) | valid starts  99.9% | agreement 0.97 | agreement < 0.5: 0.0% | 0.15s
+  gfix vs old: better 159, same 139, worse 0 | least squares, where better: SSE ratio median 3.65, >2x in 74%, >10x in 16%
+  gnew vs gfix: better 17, same 281, worse 0 | least squares, where better: SSE ratio median 1.16, >2x in 0%, >10x in 0%
+  gnew vs old: better 176, same 122, worse 0 | least squares, where better: SSE ratio median 3.33, >2x in 67%, >10x in 15%
+  4-step forecast MAE, adopted vs HEAD (n=218): changed 118; better 96, worse 22; median ratio 0.38
+  4-step forecast MAE, wide box vs adopted (n=218): changed 17; better 2, worse 15; median ratio 1.58
+
+=== windows whose first time label is 0: 58 cases
+  HEAD                    : best-known objective  84.5% | r on bound   0.0% (LB 0, UB 0) | a on bound  15.5% (LB 9, UB 0) | valid starts 100.0% | agreement 0.87 | agreement < 0.5: 1.7% | 0.16s
+  elapsed time (adopted)  : best-known objective  84.5% | r on bound   0.0% (LB 0, UB 0) | a on bound  15.5% (LB 9, UB 0) | valid starts 100.0% | agreement 0.87 | agreement < 0.5: 1.7% | 0.14s
+  elapsed time, wide box  : best-known objective  93.1% | r on bound   0.0% (LB 0, UB 0) | a on bound   8.6% (LB 5, UB 0) | valid starts  99.4% | agreement 0.91 | agreement < 0.5: 0.0% | 0.19s
+  gfix vs old: better 0, same 58, worse 0
+  gnew vs gfix: better 9, same 49, worse 0 | least squares, where better: SSE ratio median 1.09, >2x in 0%, >10x in 0%
+  gnew vs old: better 9, same 49, worse 0 | least squares, where better: SSE ratio median 1.09, >2x in 0%, >10x in 0%
+  4-step forecast MAE, adopted vs HEAD (n=28): changed 0; better 0, worse 0; median ratio nan
+  4-step forecast MAE, wide box vs adopted (n=28): changed 9; better 2, worse 7; median ratio 1.34
+
+=== windows whose first time label is not 0: 240 cases
+  HEAD                    : best-known objective  30.4% | r on bound  63.7% (LB 0, UB 153) | a on bound   4.2% (LB 10, UB 0) | valid starts 100.0% | agreement 0.58 | agreement < 0.5: 42.1% | 0.07s
+  elapsed time (adopted)  : best-known objective  96.2% | r on bound   0.0% (LB 0, UB 0) | a on bound   3.3% (LB 8, UB 0) | valid starts 100.0% | agreement 0.99 | agreement < 0.5: 0.0% | 0.10s
+  elapsed time, wide box  : best-known objective  97.9% | r on bound   0.0% (LB 0, UB 0) | a on bound   2.9% (LB 7, UB 0) | valid starts 100.0% | agreement 0.99 | agreement < 0.5: 0.0% | 0.14s
+  gfix vs old: better 159, same 81, worse 0 | least squares, where better: SSE ratio median 3.65, >2x in 74%, >10x in 16%
+  gnew vs gfix: better 8, same 232, worse 0 | least squares, where better: SSE ratio median 1.30, >2x in 0%, >10x in 0%
+  gnew vs old: better 167, same 73, worse 0 | least squares, where better: SSE ratio median 3.54, >2x in 70%, >10x in 15%
+  4-step forecast MAE, adopted vs HEAD (n=190): changed 118; better 96, worse 22; median ratio 0.38
+  4-step forecast MAE, wide box vs adopted (n=190): changed 8; better 0, worse 8; median ratio 1.58
+
+new misses best-known: 9
+   ('cholera-epidemic', 38, 20, 0) new 1443.71 ref 1441.95 (gap 1.22e-03) r=0.221 a=0.0001 | ref r=0.221 a=1e-07 | new agree 1.00 valid 14/14
+   ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-1', 1, 20, 0) new 74.8742 ref 74.8242 (gap 6.67e-04) r=0.146 a=0.0001 | ref r=0.146 a=1e-07 | new agree 0.93 valid 14/14
+   ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-1', 1, 20, 1) new -47.4406 ref -47.4486 (gap 1.70e-04) r=0.143 a=0.0001 | ref r=0.143 a=1e-07 | new agree 0.93 valid 14/14
+   ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-2', 1, 20, 0) new 380.781 ref 380.661 (gap 3.17e-04) r=0.163 a=0.0001 | ref r=0.163 a=1e-07 | new agree 0.93 valid 14/14
+   ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-3', 1, 20, 1) new -149.286 ref -149.304 (gap 1.20e-04) r=0.169 a=0.0001 | ref r=0.169 a=1e-07 | new agree 0.93 valid 14/14
+   ('simulated', 76, 20, 0) new 20.534 ref 20.5078 (gap 1.28e-03) r=0.402 a=0.0001 | ref r=0.402 a=1e-07 | new agree 0.86 valid 14/14
+   ('simulated', 76, 20, 1) new 1.09067 ref 1.08508 (gap 5.15e-03) r=0.389 a=0.0001 | ref r=0.389 a=1e-07 | new agree 1.00 valid 14/14
+   ('simulated_trimmed', 21, 20, 0) new 1443.71 ref 1441.95 (gap 1.22e-03) r=0.221 a=0.0001 | ref r=0.221 a=1e-07 | new agree 0.86 valid 14/14
+
+new-box estimates: r range [0.135, 7.93], 1st-99th pct [0.163, 6.34]; a range [0.0001, 2.02], 1st-99th pct [0.0001, 1.68]
+HEAD box with elapsed time: r below its LB would be needed in 0 cases; r above UB in 0 ; a below LB in 17 ; a above UB in 0

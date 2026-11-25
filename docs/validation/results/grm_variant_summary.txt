@@ -1,0 +1,2 @@
+hit: n=30 | variant at best-known 0.70 (current new: 0.73) | variant better than new 6, worse 2 | r on bound 0 | a at 0.05 28 | max gap variant 0.0578, new 0.255 | valid starts 0.990 | agreement 0.70
+other: n=40 | variant at best-known 0.90 (current new: 1.00) | variant better than new 0, worse 4 | r on bound 0 | a at 0.05 7 | max gap variant 0.000208, new 3.32e-06 | valid starts 0.993 | agreement 0.67

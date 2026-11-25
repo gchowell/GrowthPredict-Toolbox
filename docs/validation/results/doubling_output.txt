@@ -1,0 +1,40 @@
+=== 1. Exponential growth, incidence exp(r k) for k = 0..39; windows of 20. Doubling time of the incidence is ln(2)/r.
+  r = 0.1: ln(2)/r = 6.93
+    window starts at  0: window-relative [0.90, 1.59, 2.61, 3.76, 4.86] | epidemic count [0.90, 1.59, 2.61, 3.76, 4.86] | max |new - whole series| = 0.0e+00
+    window starts at 10: window-relative [0.90, 1.59, 2.61, 3.76, 4.86] | epidemic count [5.10, 5.89, 6.35] | max |new - whole series| = 0.0e+00
+    window starts at 20: window-relative [0.90, 1.59, 2.61, 3.76, 4.86] | epidemic count [6.28, 6.61] | max |new - whole series| = 0.0e+00
+  r = 0.2: ln(2)/r = 3.47
+    window starts at  0: window-relative [0.81, 1.34, 1.93, 2.46, 2.88, 3.15, 3.31] | epidemic count [0.81, 1.34, 1.93, 2.46, 2.88, 3.15, 3.31] | max |new - whole series| = 0.0e+00
+    window starts at 10: window-relative [0.81, 1.34, 1.93, 2.46, 2.88, 3.15, 3.31] | epidemic count [3.16, 3.31, 3.40, 3.42, 3.45] | max |new - whole series| = 0.0e+00
+    window starts at 20: window-relative [0.81, 1.34, 1.93, 2.46, 2.88, 3.15, 3.31] | epidemic count [3.40, 3.46, 3.44, 3.47, 3.46] | max |new - whole series| = 0.0e+00
+  r = 0.35: ln(2)/r = 1.98
+    window starts at  0: window-relative [0.70, 1.08, 1.39, 1.63, 1.78, 1.87, 1.93, 1.96, 1.97, 1.97, 1.98] | epidemic count [0.70, 1.08, 1.39, 1.63, 1.78, 1.87, 1.93, 1.96, 1.97, 1.97, 1.98] | max |new - whole series| = 0.0e+00
+    window starts at 10: window-relative [0.70, 1.08, 1.39, 1.63, 1.78, 1.87, 1.93, 1.96, 1.97, 1.97, 1.98] | epidemic count [1.94, 1.96, 1.96, 1.98, 1.97, 1.98, 1.98, 1.98, 1.97] | max |new - whole series| = 0.0e+00
+    window starts at 20: window-relative [0.70, 1.08, 1.39, 1.63, 1.78, 1.87, 1.93, 1.96, 1.97, 1.97, 1.98] | epidemic count [1.97, 1.98, 1.97, 1.98, 1.98, 1.98, 1.97, 1.98, 1.98] | max |new - whole series| = 0.0e+00
+
+=== 2. Epidemic that rises and falls (logistic cumulative, K = 20000, r = 0.5, midpoint 12); windows of 20
+  window starts at  0 (incidence rising; 49 cases so far, 19414 by its end): window-relative [1.33, 1.41, 1.41, 1.41, 1.51, 1.54, 1.82, 2.66] | epidemic count [1.33, 1.41, 1.41, 1.41, 1.51, 1.54, 1.82, 2.66]
+  window starts at  6 (incidence rising; 949 cases so far, 19970 by its end): window-relative [0.63, 0.96, 1.28, 1.59, 2.42] | epidemic count [1.43, 1.65, 1.93, 3.31]
+  window starts at 12 (incidence falling; 10000 cases so far, 19999 by its end): window-relative [1.00, 2.78] | epidemic count none
+  window starts at 16 (incidence falling; 17616 cases so far, 20000 by its end): window-relative [1.69] | epidemic count none
+  window starts at 20 (incidence falling; 19640 cases so far, 20000 by its end): window-relative [2.01] | epidemic count none
+
+=== 3. U.S. mpox series, windows of 20: observed counts and the fitted GLM curve
+  rows  1-20 (cases before the window      0; cumulative     14 ->  26730)
+      observed counts : window-relative [0.87, 0.89, 0.84, 0.93, 1.06, 1.12, 1.04, 1.17, 1.54, 2.40] | epidemic count [0.87, 0.89, 0.84, 0.93, 1.06, 1.12, 1.04, 1.17, 1.54, 2.40]
+      fitted GLM curve: window-relative [0.51, 0.72, 0.82, 0.85, 0.94, 1.08, 1.19, 1.39, 1.75, 2.50] | epidemic count [0.51, 0.72, 0.82, 0.85, 0.94, 1.08, 1.19, 1.39, 1.75, 2.50]
+  rows  4-23 (cases before the window     64; cumulative    144 ->  28349)
+      observed counts : window-relative [0.53, 0.81, 0.97, 0.99, 1.04, 1.32, 1.88, 3.81] | epidemic count [0.96, 1.08, 1.07, 1.04, 1.25, 1.79, 3.22]
+      fitted GLM curve: window-relative [0.45, 0.71, 0.84, 0.91, 1.14, 1.40, 1.99, 3.71] | epidemic count [0.81, 0.85, 0.98, 1.15, 1.40, 1.88, 3.21]
+  rows  8-27 (cases before the window   1033; cumulative   2045 ->  29361)
+      observed counts : window-relative [0.60, 1.02, 1.55, 2.75] | epidemic count [1.17, 1.67, 2.76]
+      fitted GLM curve: window-relative [0.62, 0.99, 1.52, 2.81] | epidemic count [1.18, 1.62, 2.82]
+  rows 13-32 (cases before the window  11725; cumulative  14752 ->  29751)
+      observed counts : window-relative [1.14, 3.09] | epidemic count [15.09]
+      fitted GLM curve: window-relative [1.14, 3.11] | epidemic count [15.55]
+
+=== 4. As the plotters report it: bootstrap of the GLM fit (least squares, normal noise, B = 200), mpox rows 13-32 and 8-27
+  rows 13-32 window-relative: doubling 1: 1.14 (1.11, 1.17), reached by 100%; doubling 2: 3.12 (3.03, 3.22), reached by 100% | mean per trajectory 2.13
+  rows 13-32 epidemic count : doubling 1: 15.65 (13.65, 17.52), reached by 100% | mean per trajectory 15.65
+  rows 8-27 window-relative: doubling 1: 0.62 (0.59, 0.65), reached by 100%; doubling 2: 0.99 (0.96, 1.02), reached by 100%; doubling 3: 1.52 (1.49, 1.55), reached by 100%; doubling 4: 2.81 (2.74, 2.88), reached by 100% | mean per trajectory 1.48
+  rows 8-27 epidemic count : doubling 1: 1.18 (1.13, 1.22), reached by 100%; doubling 2: 1.62 (1.58, 1.66), reached by 100%; doubling 3: 2.83 (2.76, 2.90), reached by 100% | mean per trajectory 1.87

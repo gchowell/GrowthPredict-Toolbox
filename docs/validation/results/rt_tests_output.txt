@@ -1,0 +1,55 @@
+=== 1. Exponential growth, weekly samples, window of 20: estimate at the window end vs exact R
+generation interval                          r    exact | start  0: old / new | start  1: old / new | start 12: old / new
+default gamma (mean 5/7, var (8/7)^2)     -0.2   0.8371 |       0.83412 / 0.8341   |        3.1727 / 0.8341   |          3596 / 0.8341  
+default gamma (mean 5/7, var (8/7)^2)      0.1   1.0678 |        1.0677 / 1.0677   |         4.968 / 1.0677   |          6412 / 1.0677  
+default gamma (mean 5/7, var (8/7)^2)      0.3   1.1863 |        1.1822 / 1.1822   |        6.0579 / 1.1822   |        8226.9 / 1.1822  
+gamma mean 1.4, sd 0.6                    -0.2   0.7502 |       0.74696 / 0.7470   |        1.2008 / 0.7470   |    2.9189e+14 / 0.7470  
+gamma mean 1.4, sd 0.6                     0.1   1.1482 |        1.1479 / 1.1479   |          1.47 / 1.1479   |    3.1934e+14 / 1.1479  
+gamma mean 1.4, sd 0.6                     0.3   1.4987 |        1.4899 / 1.4899   |        1.6474 / 1.4899   |    3.3555e+14 / 1.4899  
+exponential mean 1                        -0.2   0.8000 |       0.79654 / 0.7965   |        2.1652 / 0.7965   |    1.2964e+05 / 0.7965  
+exponential mean 1                         0.1   1.1000 |        1.0997 / 1.0997   |        2.9892 / 1.0997   |    1.7897e+05 / 1.0997  
+exponential mean 1                         0.3   1.3000 |        1.2926 / 1.2926   |        3.5135 / 1.2926   |    2.1037e+05 / 1.2926  
+fixed lag 1                               -0.2   0.8187 |       0.81692 / 0.8187   |       0.81692 / 0.8187   |       0.81692 / 0.8187  
+fixed lag 1                                0.1   1.1052 |        1.1062 / 1.1052   |        1.1062 / 1.1052   |        1.1062 / 1.1052  
+fixed lag 1                                0.3   1.3499 |        1.3534 / 1.3499   |        1.3534 / 1.3499   |        1.3534 / 1.3499  
+largest relative error, new (all starts): 0.587% | old at start 0: 0.587% | old at start 1 or 12: median 225%, max 3.89e+14x
+
+=== 2. Shift invariance: same curve, window start moved
+  default gamma (mean 5/7, var (8/7)^2)    new: max relative change = 2.5e-14 | old: max relative change = 1.37e+05
+  gamma mean 1.4, sd 0.6                   new: max relative change = 1.8e-14 | old: max relative change = 4.1e+14
+  exponential mean 1                       new: max relative change = 2.1e-14 | old: max relative change = 1.63e+05
+  fixed lag 1                              new: max relative change = 3.6e-15 | old: max relative change = 8.88e-16
+
+=== 3. Fixed lag: every lag k/100, k = 1..1000 (dense exponential input, r = 0.3, window 0..30)
+  old: 158 lags raise an indexing error (e.g. [0.14, 0.28, 0.29, 0.47, 0.56, 0.57]); implied lag error where it runs: mean +0.0100
+  new: 0 failures; implied lag error: max |4.9e-15|
+  new, lag 0.7143 (not on the grid): implied lag 0.7100
+  new, lag 0.7140 (not on the grid): implied lag 0.7100
+  new, lag 0.3571 (not on the grid): implied lag 0.3600
+  new, lag longer than the window: all NaN = True
+  new, lag 0.004: rejected
+
+=== 4. Renewal simulation with a known, changing R(t) (gamma GI mean 1.4, sd 0.6; 40 time units)
+  simulated incidence: peak 37699 at t = 17; R(t) from 2.59 to 0.70
+  window  0-19: true R at end 0.881 | old 0.8859 | new 0.886 | max relative error after 6 units of history: old 0.041, new 4.103%
+  window  5-24: true R at end 0.721 | old 1.802e+04 | new 0.719 | max relative error after 6 units of history: old 2.5e+04, new 2.824%
+  window 12-31: true R at end 0.701 | old 2.875e+14 | new 0.697 | max relative error after 6 units of history: old 4.13e+14, new 0.689%
+  window 20-39: true R at end 0.700 | old nan | new 0.697 | max relative error after 6 units of history: old nan, new 0.495%
+
+=== 5. How much history the estimate needs (exponential growth r = 0.2, new function, relative error vs elapsed time)
+  default gamma (mean 5/7, var (8/7)^2)    error at elapsed 1, 2, 4, 8: +19.9%, +6.3%, +0.9%, -0.1% | within 5% from 2.29, within 1% from 3.93
+  gamma mean 1.4, sd 0.6                   error at elapsed 1, 2, 4, 8: +220.1%, +13.9%, -0.2%, -0.2% | within 5% from 2.43, within 1% from 2.96
+  exponential mean 1                       error at elapsed 1, 2, 4, 8: +42.8%, +9.7%, +0.6%, -0.2% | within 5% from 2.58, within 1% from 3.84
+
+=== 6. CSV export labels (window 0..19): row pairing of time label and estimate
+  old (label, time the estimate refers to): [(0.01, 0.02), (1.01, 1.02), (2.01, 2.02)] ... 20 rows
+  new (label, time the estimate refers to): [(1.0, 1.0), (2.0, 2.0), (3.0, 3.0)] ... 19 rows, last label 19.00
+
+=== 7. Bundled series: Rt of the fitted GLM curve at the window end (default GI), old vs new
+  Most_Recent_Timeseries_US-CDC.txt            rows   1-20  first time label    0 | old      0.7541 | new 0.754
+  Most_Recent_Timeseries_US-CDC.txt            rows   4-23  first time label    3 | old       10.89 | new 0.730
+  Most_Recent_Timeseries_US-CDC.txt            rows   8-27  first time label    7 | old      145.77 | new 0.755
+  Most_Recent_Timeseries_US-CDC.txt            rows  13-32  first time label   12 | old        3131 | new 0.784
+  Stochastic SIR simulation results (n=2) Pois rows   1-20  first time label    1 | old  5.8818e-08 | new 0.000
+  weekly-Mpox-cases-Canada-05-31-2023.txt      rows   1-20  first time label    1 | old      3.3545 | new 0.857
+  weekly-Mpox-cases-US_CDC-05-24-2023.txt      rows   1-20  first time label    1 | old      3.0356 | new 0.804

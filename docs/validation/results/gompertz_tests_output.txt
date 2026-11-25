@@ -1,0 +1,27 @@
+=== 1. Same 20 observations (mpox rows 1-20), time labels shifted: least-squares Gompertz fit
+  first label   0 | HEAD   : r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+  first label   1 | HEAD   : r = 1.778    a = 0.1876  SSE = 2.7171e+06 r on bound: False | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+  first label   7 | HEAD   : r = 5.481    a = 0.1876  SSE = 2.7171e+06 r on bound: False | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+  first label  12 | HEAD   : r = 10       a = 0.1681  SSE = 3.9359e+06 r on bound: True  | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+  first label  30 | HEAD   : r = 10       a = 0.08603 SSE = 2.6635e+07 r on bound: True  | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+  first label 100 | HEAD   : r = 10       a = 0.03084 SSE = 4.1131e+07 r on bound: True  | adopted: r = 1.474    a = 0.1876  SSE = 2.7171e+06 r on bound: False
+
+=== 2. Same observations, time step DT changed (labels 0..19; times are labels*DT)
+  DT = 1      | HEAD   : r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False | adopted: r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False
+  DT = 7      | HEAD   : r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False | adopted: r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False
+  DT = 0.1429 | HEAD   : r*DT = 1.429   a*DT = 0.1817  SSE = 2.8337e+06 on bound: True  | adopted: r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False
+  DT = 30     | HEAD   : r*DT = 18.45   a*DT = 24.21   SSE = 5.8486e+07 on bound: False | adopted: r*DT = 1.474   a*DT = 0.1876  SSE = 2.7171e+06 on bound: False
+
+=== 3. Simulated Gompertz epidemics with Poisson noise, 60 replicates, Poisson MLE (true r = 0.8, a = 0.15, C0 = 20; 25 points; 7-step forecast)
+  first label  0 HEAD   : reported r median 0.798     | growth rate at first observation: median 0.798 (true 0.8) | a median 0.150 (true 0.15) | r on bound   0% | 7-step MAE / mean 0.040
+  first label  0 adopted: reported r median 0.798     | growth rate at first observation: median 0.798 (true 0.8) | a median 0.150 (true 0.15) | r on bound   0% | 7-step MAE / mean 0.040
+  first label 10 HEAD   : reported r median 3.569     | growth rate at first observation: median 0.798 (true 0.8) | a median 0.150 (true 0.15) | r on bound   0% | 7-step MAE / mean 0.040
+  first label 10 adopted: reported r median 0.798     | growth rate at first observation: median 0.798 (true 0.8) | a median 0.150 (true 0.15) | r on bound   0% | 7-step MAE / mean 0.040
+  first label 40 HEAD   : reported r median 9.954     | growth rate at first observation: median 0.460 (true 0.8) | a median 0.077 (true 0.15) | r on bound 100% | 7-step MAE / mean 3.191
+  first label 40 adopted: reported r median 0.798     | growth rate at first observation: median 0.798 (true 0.8) | a median 0.150 (true 0.15) | r on bound   0% | 7-step MAE / mean 0.040
+
+=== 4. Bootstrap as in the runners (least squares, normal noise, B = 200), mpox rows 13-32 and 8-27
+  rows 13-32 HEAD   : RMSE  374.8 | r = 8.331 (3.423, 8.331), refits at upper bound 54% | a = 0.2452 (0.1896, 0.2509)
+  rows 13-32 adopted: RMSE  150.4 | r = 0.6732 (0.6245, 0.7197), refits at upper bound 0% | a = 0.3939 (0.3592, 0.4265)
+  rows 8-27 HEAD   : RMSE   96.4 | r = 8.217 (7.58, 8.84), refits at upper bound 0% | a = 0.3011 (0.2933, 0.3082) | 4-step MAE 36
+  rows 8-27 adopted: RMSE   96.4 | r = 0.9983 (0.9735, 1.02), refits at upper bound 0% | a = 0.3011 (0.2933, 0.3082) | 4-step MAE 36

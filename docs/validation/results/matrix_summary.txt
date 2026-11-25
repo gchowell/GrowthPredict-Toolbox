@@ -1,0 +1,106 @@
+cases fitted: 960  | skipped: 123 (Counter({'too few counts': 65, 'time index is not unit-spaced': 58})) | errors: 0
+datasets: 18
+
+=== ALL (fixI0 = 1): 894 cases
+  old: reaches best-known objective  51.3% | slot-1 (r or i0) on bound  50.3% | p on bound  18.7% | K on bound  22.7% | valid starts 100.0% | start agreement 0.88 | no fit 0 | 0.56s/fit
+  new: reaches best-known objective  99.1% | slot-1 (r or i0) on bound   3.1% | p on bound  44.4% | K on bound  16.1% | valid starts  99.9% | start agreement 0.85 | no fit 0 | 0.81s/fit
+   i0: reaches best-known objective  91.6% | slot-1 (r or i0) on bound   8.6% | p on bound  40.2% | K on bound  14.8% | valid starts 100.0% | start agreement 0.85 | no fit 0 | 0.39s/fit
+  new vs old objective: better in 435 (48.7%), same in 458, worse in 1
+    where better: SSE(old)/SSE(new) median 1.02, 90th pct 8.1, max 10645012936613334.0
+    where better: |p(old)-p(new)| median 0.354, share > 0.1: 87%
+    WORSE ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-2', 30, 20, 'GRM', 0, 1): old 5189.7 new 5200.6 ref 5189.7  new valid 14/14 agree 0.79
+  new misses best-known in 8 cases; of these, 40-start run in the same box finds it: 2
+  4-step forecast MAE (n=654): changed in 328; among changed: new better in 229, worse in 99; median MAE old 29.4 -> new 28.1; median ratio new/old 0.85
+
+=== GGM, least squares: 149 cases
+  old: reaches best-known objective  38.9% | slot-1 (r or i0) on bound  59.1% | p on bound  19.5% | K on bound   0.0% | valid starts 100.0% | start agreement 1.00 | no fit 0 | 0.18s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  62.4% | K on bound   0.0% | valid starts  99.9% | start agreement 0.98 | no fit 0 | 0.16s/fit
+   i0: reaches best-known objective  89.3% | slot-1 (r or i0) on bound  10.7% | p on bound  59.1% | K on bound   0.0% | valid starts 100.0% | start agreement 0.99 | no fit 0 | 0.15s/fit
+  new vs old objective: better in 91 (61.1%), same in 58, worse in 0
+    where better: SSE(old)/SSE(new) median 1.32, 90th pct 4.9, max 67.2
+    where better: |p(old)-p(new)| median 0.287, share > 0.1: 89%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=109): changed in 66; among changed: new better in 39, worse in 27; median MAE old 122.6 -> new 89.3; median ratio new/old 0.94
+
+=== GGM, Poisson MLE: 149 cases
+  old: reaches best-known objective  41.6% | slot-1 (r or i0) on bound  58.4% | p on bound  19.5% | K on bound   0.0% | valid starts 100.0% | start agreement 0.99 | no fit 0 | 0.16s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  63.8% | K on bound   0.0% | valid starts  99.8% | start agreement 0.99 | no fit 0 | 0.15s/fit
+   i0: reaches best-known objective  90.6% | slot-1 (r or i0) on bound  10.1% | p on bound  59.7% | K on bound   0.0% | valid starts 100.0% | start agreement 0.99 | no fit 0 | 0.14s/fit
+  new vs old objective: better in 87 (58.4%), same in 62, worse in 0
+    where better: NLL(old)-NLL(new) median 446.2, 90th pct 50368.8, max 119469.3
+    where better: |p(old)-p(new)| median 0.300, share > 0.1: 87%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=109): changed in 65; among changed: new better in 56, worse in 9; median MAE old 144.1 -> new 102.7; median ratio new/old 0.78
+
+=== GLM, least squares: 149 cases
+  old: reaches best-known objective  56.4% | slot-1 (r or i0) on bound  40.9% | p on bound  14.1% | K on bound  45.0% | valid starts 100.0% | start agreement 0.93 | no fit 0 | 0.41s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  28.2% | K on bound  30.2% | valid starts 100.0% | start agreement 0.92 | no fit 0 | 0.53s/fit
+   i0: reaches best-known objective  91.9% | slot-1 (r or i0) on bound   8.1% | p on bound  24.2% | K on bound  28.9% | valid starts 100.0% | start agreement 0.90 | no fit 0 | 0.34s/fit
+  new vs old objective: better in 65 (43.6%), same in 84, worse in 0
+    where better: SSE(old)/SSE(new) median 2.10, 90th pct 20.5, max 98.4
+    where better: |p(old)-p(new)| median 0.372, share > 0.1: 92%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=109): changed in 48; among changed: new better in 35, worse in 13; median MAE old 14.7 -> new 8.9; median ratio new/old 0.71
+
+=== GLM, Poisson MLE: 149 cases
+  old: reaches best-known objective  58.4% | slot-1 (r or i0) on bound  42.3% | p on bound  11.4% | K on bound  36.2% | valid starts 100.0% | start agreement 0.94 | no fit 0 | 0.42s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  25.5% | K on bound  27.5% | valid starts 100.0% | start agreement 0.86 | no fit 0 | 0.59s/fit
+   i0: reaches best-known objective  92.6% | slot-1 (r or i0) on bound   7.4% | p on bound  22.1% | K on bound  25.5% | valid starts 100.0% | start agreement 0.85 | no fit 0 | 0.37s/fit
+  new vs old objective: better in 62 (41.6%), same in 87, worse in 0
+    where better: NLL(old)-NLL(new) median 41.9, 90th pct 5757.3, max 15524.3
+    where better: |p(old)-p(new)| median 0.365, share > 0.1: 97%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=109): changed in 50; among changed: new better in 34, worse in 16; median MAE old 12.3 -> new 8.7; median ratio new/old 0.83
+
+=== GRM, least squares: 149 cases
+  old: reaches best-known objective  53.0% | slot-1 (r or i0) on bound  49.7% | p on bound  24.2% | K on bound  32.9% | valid starts 100.0% | start agreement 0.72 | no fit 0 | 0.95s/fit
+  new: reaches best-known objective  94.6% | slot-1 (r or i0) on bound   8.7% | p on bound  43.6% | K on bound  24.2% | valid starts  99.9% | start agreement 0.71 | no fit 0 | 1.66s/fit
+   i0: reaches best-known objective  91.3% | slot-1 (r or i0) on bound   8.1% | p on bound  37.6% | K on bound  22.8% | valid starts 100.0% | start agreement 0.72 | no fit 0 | 0.67s/fit
+  new vs old objective: better in 70 (47.0%), same in 78, worse in 1
+    where better: SSE(old)/SSE(new) median 1.71, 90th pct 16.2, max 90.6
+    where better: |p(old)-p(new)| median 0.416, share > 0.1: 76%
+    WORSE ('curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-2', 30, 20, 'GRM', 0, 1): old 5189.7 new 5200.6 ref 5189.7  new valid 14/14 agree 0.79
+  new misses best-known in 8 cases; of these, 40-start run in the same box finds it: 2
+  4-step forecast MAE (n=109): changed in 49; among changed: new better in 33, worse in 16; median MAE old 15.2 -> new 8.7; median ratio new/old 0.82
+
+=== GRM, Poisson MLE: 149 cases
+  old: reaches best-known objective  59.7% | slot-1 (r or i0) on bound  51.7% | p on bound  23.5% | K on bound  22.1% | valid starts 100.0% | start agreement 0.69 | no fit 0 | 1.23s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound  10.1% | p on bound  43.0% | K on bound  14.8% | valid starts  99.9% | start agreement 0.67 | no fit 0 | 1.75s/fit
+   i0: reaches best-known objective  94.0% | slot-1 (r or i0) on bound   7.4% | p on bound  38.3% | K on bound  11.4% | valid starts 100.0% | start agreement 0.68 | no fit 0 | 0.68s/fit
+  new vs old objective: better in 60 (40.3%), same in 89, worse in 0
+    where better: NLL(old)-NLL(new) median 17.0, 90th pct 3770.3, max 15693.5
+    where better: |p(old)-p(new)| median 0.405, share > 0.1: 78%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=109): changed in 50; among changed: new better in 32, worse in 18; median MAE old 12.3 -> new 8.9; median ratio new/old 0.90
+
+=== GLM least squares, fixI0 = 0: 66 cases
+  old: reaches best-known objective  50.0% | slot-1 (r or i0) on bound  47.0% | p on bound  19.7% | K on bound  39.4% | valid starts 100.0% | start agreement 0.96 | no fit 0 | 0.30s/fit
+  new: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  36.4% | K on bound  22.7% | valid starts 100.0% | start agreement 0.97 | no fit 0 | 0.48s/fit
+   i0: reaches best-known objective 100.0% | slot-1 (r or i0) on bound   0.0% | p on bound  36.4% | K on bound  22.7% | valid starts 100.0% | start agreement 0.93 | no fit 0 | 0.31s/fit
+  new vs old objective: better in 33 (50.0%), same in 33, worse in 0
+    where better: SSE(old)/SSE(new) median 1.85, 90th pct 18.9, max 92.0
+    where better: |p(old)-p(new)| median 0.340, share > 0.1: 97%
+  new misses best-known in 0 cases; of these, 40-start run in the same box finds it: 0
+  4-step forecast MAE (n=62): changed in 28; among changed: new better in 20, worse in 8; median MAE old 11.0 -> new 8.0; median ratio new/old 0.76
+
+new r box hits (fixI0=1): Counter({('GRM', 'UB'): 28})
+old: widened and still on r bound: 141 | widened total: 219
+per dataset (fixI0=1): share of cases where new improves on old
+   Most_Recent_Timeseries_US-CDC                                   33/54
+   Stochastic SIR simulation results (n=2) Poisson R=10 TimeStep=  24/54
+   cases-weekly-mpox-Chile                                         30/54
+   cholera-epidemic                                                14/42
+   curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-1-factor1-1     26/54
+   curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-1     26/54
+   curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-2     24/54
+   curve-GLM model-r-0.18-p-0.94-K-10000-M-1-dist1-3-factor1-3     27/54
+   curve-SEIR                                                      26/54
+   curve-covid-nyc-cases                                           42/54
+   curve1                                                          14/54
+   curve2                                                           0/48
+   sim-GLM-poiss                                                   29/54
+   simulated                                                       20/42
+   simulated_trimmed                                                9/36
+   weekly-Mpox-cases-Canada-05-31-2023                             15/42
+   weekly-Mpox-cases-US_CDC-05-24-2023                             40/54
+   yearly-HIV-cases-national-National                              36/36

@@ -1,0 +1,23 @@
+=== 1. Distributions (weekly units)
+  old default / cholera: 5 d, SD 8 d                     mean 0.7143  variance 1.3061  shape 0.3906  scale 1.8286  P(within 1 day) 40.7%  95% within 2.99 weeks
+  new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  mean 1.2143  variance 0.5102  shape 2.8900  scale 0.4202  P(within 1 day) 0.7%  95% within 2.58 weeks
+  mpox, US rash onset: 7.0 d, SD 4.2 d                   mean 1.0000  variance 0.3600  shape 2.7778  scale 0.3600  P(within 1 day) 1.3%  95% within 2.15 weeks
+
+=== 2. Exponential growth, t = 0..19, incidence 100*exp(r t): estimate at the window end vs exact (1 + r b)^a
+  old default / cholera: 5 d, SD 8 d                     r = -0.2: Rs(end) = 0.8341238667  Rs(500) = 0.8725472151  exact = 0.837081  (-0.35%)
+  old default / cholera: 5 d, SD 8 d                     r = +0.3: Rs(end) = 1.1822069459  Rs(500) = 1.1850088598  exact = 1.186293  (-0.34%)
+  new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  r = -0.2: Rs(end) = 0.7725372230  Rs(500) = 0.7733920081  exact = 0.775947  (-0.44%)
+  new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  r = +0.3: Rs(end) = 1.4004398175  Rs(500) = 1.4006215372  exact = 1.409296  (-0.63%)
+  mpox, US rash onset: 7.0 d, SD 4.2 d                   r = -0.2: Rs(end) = 0.8089356418  Rs(500) = 0.8090695765  exact = 0.812560  (-0.45%)
+  mpox, US rash onset: 7.0 d, SD 4.2 d                   r = +0.3: Rs(end) = 1.3210181489  Rs(500) = 1.3210421916  exact = 1.329602  (-0.65%)
+
+=== 3. U.S. mpox series: Rt of the fitted GLM curve (least squares, fixI0 = 1)
+  rows  1-20 old default / cholera: 5 d, SD 8 d                     Rt at start+5: 1.31  start+10: 1.15  end: 0.754  falls below 1 at t = 13.0
+  rows  1-20 new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  Rt at start+5: 1.84  start+10: 1.30  end: 0.654  falls below 1 at t = 12.7
+  rows  1-20 mpox, US rash onset: 7.0 d, SD 4.2 d                   Rt at start+5: 1.65  start+10: 1.23  end: 0.702  falls below 1 at t = 12.5
+  rows  8-27 old default / cholera: 5 d, SD 8 d                     Rt at start+5: 1.04  start+10: 0.86  end: 0.755  falls below 1 at t = 12.7
+  rows  8-27 new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  Rt at start+5: 1.03  start+10: 0.77  end: 0.687  falls below 1 at t = 12.2
+  rows  8-27 mpox, US rash onset: 7.0 d, SD 4.2 d                   Rt at start+5: 1.01  start+10: 0.80  end: 0.735  falls below 1 at t = 12.1
+  rows 13-32 old default / cholera: 5 d, SD 8 d                     Rt at start+5: 0.88  start+10: 0.81  end: 0.784  below 1 throughout
+  rows 13-32 new default / mpox, US symptom onset: 8.5 d, SD 5.0 d  Rt at start+5: 0.77  start+10: 0.73  end: 0.720  below 1 throughout
+  rows 13-32 mpox, US rash onset: 7.0 d, SD 4.2 d                   Rt at start+5: 0.81  start+10: 0.77  end: 0.764  below 1 throughout

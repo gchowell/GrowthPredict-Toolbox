@@ -1,0 +1,10 @@
+integrator: worst relative difference vs LSODA over 1000 random parameter sets = 7.15e-10
+quick start (old box): r=1.7302 p=0.8526 K=28547.0 SSE=3.1779e+05 agree=0.93 box r=[0.03153,12.61]  (0.33s)
+quick start (new box): r=1.7302 p=0.8526 K=28547.1 SSE=3.1779e+05 agree=0.86 box slot1=[0.0001,3.132e+04]
+quick start (i0 box): r=1.7302 p=0.8526 K=28547.1 SSE=3.1779e+05 agree=0.93 box slot1=[1.067,426.7]
+rows 13-32 old: r=10 p=0.676 K=18026 RMSE=218.1 atBound(r/i0)=True widened=False agree=1.00 valid=14/14
+rows 13-32 new: r=803.1 p=0.177 K=18153 RMSE=34.1 atBound(r/i0)=False widened=False agree=0.79 valid=14/14
+rows 13-32  i0: r=803.1 p=0.177 K=18153 RMSE=34.1 atBound(r/i0)=False widened=False agree=0.79 valid=14/14
+rows 8-27 old: r=10 p=0.672 K=28328 RMSE=165.6 atBound(r/i0)=True widened=True agree=1.00 valid=14/14
+rows 8-27 new: r=26.97 p=0.558 K=28501 RMSE=68.0 atBound(r/i0)=False widened=False agree=0.93 valid=14/14
+rows 8-27  i0: r=26.97 p=0.558 K=28501 RMSE=68.0 atBound(r/i0)=False widened=False agree=0.93 valid=14/14

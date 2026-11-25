@@ -1,0 +1,49 @@
+=== 1. Which rows are kept (window labelled 12..31, 95% coverage)
+  mpox default: 8.5 d, SD 5.0 d      reliable from t = 14.58 | CSV rows: t = 15..31 (17 rows; dropped t = [13, 14])
+  cholera: 5 d, SD 8 d               reliable from t = 15.00 | CSV rows: t = 15..31 (17 rows; dropped t = [13, 14])
+  mpox rash onset: 7.0 d, SD 4.2 d   reliable from t = 14.15 | CSV rows: t = 15..31 (17 rows; dropped t = [13, 14])
+  exponential, mean 1                reliable from t = 15.00 | CSV rows: t = 15..31 (17 rows; dropped t = [13, 14])
+  fixed, 1                           reliable from t = 13.00 | CSV rows: t = 13..31 (19 rows; dropped t = [])
+
+=== 2. Exponential growth or decline, exact R known: relative error of the rows dropped and kept (unit-time rows)
+  generation interval                    r | dropped rows: errors | kept rows: largest |error|
+  mpox default: 8.5 d, SD 5.0 d       -0.3 | +167%, +23% | 3.9%
+  mpox default: 8.5 d, SD 5.0 d       -0.2 | +150%, +20% | 3.4%
+  mpox default: 8.5 d, SD 5.0 d        0.1 | +109%, +13% | 1.8%
+  mpox default: 8.5 d, SD 5.0 d        0.3 | +88%, +9% | 0.6%
+  cholera: 5 d, SD 8 d                -0.3 | +63%, +32% | 19.4%
+  cholera: 5 d, SD 8 d                -0.2 | +47%, +22% | 11.9%
+  cholera: 5 d, SD 8 d                 0.1 | +24%, +8% | 3.5%
+  cholera: 5 d, SD 8 d                 0.3 | +16%, +5% | 1.3%
+  mpox rash onset: 7.0 d, SD 4.2 d    -0.3 | +96%, +11% | 0.9%
+  mpox rash onset: 7.0 d, SD 4.2 d    -0.2 | +87%, +9% | 0.8%
+  mpox rash onset: 7.0 d, SD 4.2 d     0.1 | +66%, +6% | 0.6%
+  mpox rash onset: 7.0 d, SD 4.2 d     0.3 | +54%, +4% | 0.6%
+  exponential, mean 1                 -0.3 | +97%, +32% | 12.9%
+  exponential, mean 1                 -0.2 | +81%, +25% | 9.5%
+  exponential, mean 1                  0.1 | +50%, +12% | 3.8%
+  exponential, mean 1                  0.3 | +37%, +7% | 1.5%
+  fixed, 1                            -0.3 | - | 0.0%
+  fixed, 1                            -0.2 | - | 0.0%
+  fixed, 1                             0.1 | - | 0.0%
+  fixed, 1                             0.3 | - | 0.0%
+  largest |error| among kept rows, per interval: {'mpox default: 8.5 d, SD 5.0 d': '3.9%', 'cholera: 5 d, SD 8 d': '19.4%', 'mpox rash onset: 7.0 d, SD 4.2 d': '0.9%', 'exponential, mean 1': '12.9%', 'fixed, 1': '0.0%'}
+
+=== 3. Choice of threshold: first exported row and largest |error| among kept unit-time rows (window 12..31)
+  mpox default: 8.5 d, SD 5.0 d    threshold 0.90: first row t = 15 | r=-0.3: 3.9%  r=-0.2: 3.4%  r=+0.1: 1.8%  r=+0.3: 0.6%
+  mpox default: 8.5 d, SD 5.0 d    threshold 0.95: first row t = 15 | r=-0.3: 3.9%  r=-0.2: 3.4%  r=+0.1: 1.8%  r=+0.3: 0.6%
+  mpox default: 8.5 d, SD 5.0 d    threshold 0.99: first row t = 16 | r=-0.3: 0.9%  r=-0.2: 0.4%  r=+0.1: 0.2%  r=+0.3: 0.6%
+  cholera: 5 d, SD 8 d             threshold 0.90: first row t = 15 | r=-0.3: 19.4%  r=-0.2: 11.9%  r=+0.1: 3.5%  r=+0.3: 1.3%
+  cholera: 5 d, SD 8 d             threshold 0.95: first row t = 15 | r=-0.3: 19.4%  r=-0.2: 11.9%  r=+0.1: 3.5%  r=+0.3: 1.3%
+  cholera: 5 d, SD 8 d             threshold 0.99: first row t = 18 | r=-0.3: 5.7%  r=-0.2: 2.6%  r=+0.1: 0.3%  r=+0.3: 0.3%
+  exponential, mean 1              threshold 0.90: first row t = 15 | r=-0.3: 12.9%  r=-0.2: 9.5%  r=+0.1: 3.8%  r=+0.3: 1.5%
+  exponential, mean 1              threshold 0.95: first row t = 15 | r=-0.3: 12.9%  r=-0.2: 9.5%  r=+0.1: 3.8%  r=+0.3: 1.5%
+  exponential, mean 1              threshold 0.99: first row t = 17 | r=-0.3: 2.2%  r=-0.2: 1.4%  r=+0.1: 0.4%  r=+0.3: 0.6%
+
+=== 4. Window too short for the generation interval (mean 10, SD 5, window 0..5)
+  coverage at the end 0.143 | any reliable: False | rows exported: t = [5.0] (the last time, flagged by its coverage)
+
+=== 5. U.S. mpox series, Rt of the fitted GLM curve with the mpox default: unit-time rows before and after the filter
+  rows  1-20: dropped t=1: Rt 3.20 (coverage 45%), t=2: Rt 2.33 (coverage 87%) | kept from t=3: Rt 2.12 (coverage 98%) ... t=19: Rt 0.654 | 17 rows | largest kept Rt 2.12
+  rows  8-27: dropped t=8: Rt 2.91 (coverage 45%), t=9: Rt 1.63 (coverage 87%) | kept from t=10: Rt 1.31 (coverage 98%) ... t=26: Rt 0.687 | 17 rows | largest kept Rt 1.31
+  rows 13-32: dropped t=13: Rt 2.04 (coverage 45%), t=14: Rt 1.02 (coverage 87%) | kept from t=15: Rt 0.85 (coverage 98%) ... t=31: Rt 0.720 | 17 rows | largest kept Rt 0.85
