@@ -78,7 +78,7 @@ For a window labelled 0 to 19, the old file had 20 rows labelled 0.01, 1.01, ...
 
 - **Start of every window.** Incidence before the window is not used, so early estimates are too high. For exponential growth at r = 0.2 with the generation interval that was then the default (mean 5 days, SD 8 days) the error is +20% one time unit in, +6% at two and under 1% from about four. A later change uses `giCoverage` to leave these estimates out of the plots and the CSV; see [reproduction-number-coverage.md](reproduction-number-coverage.md).
 - **Generation-interval values.** This change left the default (mean 5 days, SD 8 days) and the values in `options_Rt_mpox.m` as they were, apart from the syntax error. Both were changed afterwards; see [generation-interval-defaults.md](generation-interval-defaults.md).
-- **`get_Rt_old.m`** is still in the folder and still declares a function named `get_Rt`.
+- **`get_Rt_old.m`** is still in the folder and still declares a function named `get_Rt`. (In v1.1.1 it moved to the code folder's `legacy` folder.)
 
 ## Reproducing
 

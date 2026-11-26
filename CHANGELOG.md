@@ -2,6 +2,24 @@
 
 Versions follow the tags of this repository. Entries list what changed for a user of the toolbox; "Rerun" says which earlier results are affected.
 
+## v1.1.1 (2026-11-26)
+
+### Rerun
+
+- **Nothing.** No fitting, forecasting or plotting function changed, so results are the same as with v1.1.0.
+
+### Changed
+
+- **Option files declare their own name.** The 17 bundled variants of `options_fit.m` and `options_forecast.m` (for example `options_fit_GLM.m` and `options_forecast_pois.m`) declared a function named `options_fit` or `options_forecast`. MATLAB goes by the filename, so a handle such as `@options_fit_GLM` returns the same values as before.
+- **`options_fit_EXP_choleraSally.m` is now `options_fit_EXP_cholera.m`.** Pass `@options_fit_EXP_cholera`.
+- **Twelve scripts from earlier analyses moved to `forecasting_growthmodels code/legacy`,** with a README describing each: the five `temp_Rt_slidingwindow*.m` scripts, `plotRt_cholera.m`, `Read_Rs_choleradistricts.m`, `estimateGrowthRatesCholera.m`, `plotParamsByErrorStructure_simulated1.m`, `timingStudy.m`, `get_Rt_old.m` and `options_Rt_xinyi.m`. No runner, plotting function or test calls them. To use one, call `addpath('legacy')` from the code folder.
+- **`CITATION.cff`** names the tutorial paper (Chowell et al., *Scientific Reports*, 2024) as the preferred citation, so "Cite this repository" on GitHub gives the paper.
+
+### Removed
+
+- **The `output` folder** and its results from earlier versions. The runners and plotting functions create the folder on first use. `make_readme_figures(false)` needs a full run of `make_readme_figures` first.
+- **`options_fit_EXP.m`.** For an exponential fit, see `options_fit_EXP_cholera.m`.
+
 ## v1.1.0 (2026-11-25)
 
 ### Rerun

@@ -11,7 +11,7 @@ Base commit: `b7829ae`, after the `r`-interval, `get_Rt.m` and generation-interv
 | `README.md` | Describes the filter, the new column and its limit. |
 | `tests/test_selectRtRows.m` | Seven tests (new file). |
 
-`plotRt.m` and `plotRt_cholera.m` read the last row and the first four columns of each `Rt-*.csv`, so they are unaffected. The threshold is the constant `minCoverageRt = 0.95` in each plotter.
+`plotRt.m` and `plotRt_cholera.m` read the last row and the first four columns of each `Rt-*.csv`, so they are unaffected. (In v1.1.1 `plotRt_cholera.m` moved to the code folder's `legacy` folder.) The threshold is the constant `minCoverageRt = 0.95` in each plotter.
 
 ## Results (`results/coverage_output.txt`)
 

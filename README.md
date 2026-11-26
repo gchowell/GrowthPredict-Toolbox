@@ -246,11 +246,13 @@ To regenerate all six README figures from a fresh checkout, run the following co
 make_readme_figures
 ```
 
-After the full run, `make_readme_figures(false)` redraws the figures from the saved MAT files. It needs the 20-observation fit starting at row 1, the single-window four-step forecast starting at row 1, and the six-window four-step forecast starting at rows 1–6. The historical MAT files bundled in `output/` use other settings.
+After the full run, `make_readme_figures(false)` redraws the figures from the saved MAT files. It needs the 20-observation fit starting at row 1, the single-window four-step forecast starting at row 1, and the six-window four-step forecast starting at rows 1–6. The repository ships without an `output/` folder, so run the full command once before using this option.
 
-Record the repository revision (`git rev-parse HEAD`), MATLAB and toolbox versions (`ver`), input data, options functions, window arguments and random seed. Output filenames omit the seed, `B` and some optimizer settings, so archive results before rerunning with those settings changed. The repository also includes historical outputs.
+Record the repository revision (`git rev-parse HEAD`), MATLAB and toolbox versions (`ver`), input data, options functions, window arguments and random seed. Output filenames omit the seed, `B` and some optimizer settings, so archive results before rerunning with those settings changed. The runners create `output/` on first use. Results bundled with earlier versions were removed and remain in the Git history.
 
 If plotting cannot find a MAT file, check that the runner and plotter use the same working folder, options, window range and horizon. To report an issue, include the commands, relevant options, error or warning text and a small shareable example. For a code contribution, describe the expected behavior and include a regression test. [GitHub Issues](https://github.com/gchowell/GrowthPredict-Toolbox/issues)
+
+Scripts from earlier analyses that the runners and tests do not use are in the code folder's `legacy` folder. [Legacy scripts](forecasting_growthmodels%20code/legacy/README.md)
 
 The regression tests are in the `tests` folder of the code folder. Run them from the code folder; they need the toolboxes listed under Installation and take a few seconds. The changes in each version, and which earlier results to rerun, are listed in the changelog. The validation notes compare the toolbox with independent Python re-implementations of the fit, the renewal calculation and the doubling times. [Changelog](CHANGELOG.md) · [Validation notes](docs/validation/README.md)
 

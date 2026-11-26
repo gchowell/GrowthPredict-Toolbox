@@ -51,7 +51,7 @@ Exponential growth at r = 0.3 per week with the new default: exact R = 1.4093, e
 
 - `docs/images/Rt.png` depends on the default; regenerate it with `make_readme_figures` after changing `options_Rt.m`.
 - Rt results produced with the default options file change; see `CHANGELOG.md`.
-- `options_Rt_xinyi.m` (mean 4, variance 8) is untouched.
+- `options_Rt_xinyi.m` (mean 4, variance 8) is untouched. (In v1.1.1 it moved to the code folder's `legacy` folder.)
 
 ## Reproducing
 

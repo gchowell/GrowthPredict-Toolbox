@@ -1,11 +1,43 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use GrowthPredict, please cite the tutorial paper below (preferred citation). To cite the exact software version you used, cite this release."
 title: "GrowthPredict Toolbox"
-version: v1.1.0
-date-released: 2026-11-25
+type: software
+version: v1.1.1
+date-released: 2026-11-26
 license: GPL-3.0-only
 repository-code: "https://github.com/gchowell/GrowthPredict-Toolbox"
+keywords:
+  - epidemic forecasting
+  - phenomenological growth models
+  - parameter estimation
+  - parametric bootstrap
+  - weighted interval score
+  - MATLAB
 authors:
   - family-names: Chowell
     given-names: Gerardo
     orcid: "https://orcid.org/0000-0003-2194-2251"
+preferred-citation:
+  type: article
+  title: "GrowthPredict: A toolbox and tutorial-based primer for fitting and forecasting growth trajectories using phenomenological growth models"
+  authors:
+    - family-names: Chowell
+      given-names: Gerardo
+      orcid: "https://orcid.org/0000-0003-2194-2251"
+    - family-names: Bleichrodt
+      given-names: Amanda
+    - family-names: Dahal
+      given-names: Sushma
+    - family-names: Tariq
+      given-names: Amna
+    - family-names: Roosa
+      given-names: Kimberlyn
+    - family-names: Hyman
+      given-names: James M.
+    - family-names: Luo
+      given-names: Ruiyan
+  journal: "Scientific Reports"
+  volume: 14
+  start: 1630
+  year: 2024
+  doi: "10.1038/s41598-024-51852-8"
