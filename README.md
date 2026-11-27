@@ -28,7 +28,7 @@ cd(fullfile(pwd, 'forecasting_growthmodels code'))
 
 ## Quick start
 
-Forecast four observations from the first 20 observations of the bundled U.S. mpox series. The forecast runner fits the model itself, so this example can be run immediately after installation.
+Use the first 20 weeks of the bundled U.S. mpox case series to forecast weekly case counts for the next four weeks. The forecast runner fits the model itself, so this example can be run immediately after installation.
 
 ```matlab
 rng(1, 'twister');
