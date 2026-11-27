@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "growthpredict"
+version = "1.1.1"
+description = "Fitting and forecasting growth trajectories with phenomenological growth models (Python port of the GrowthPredict MATLAB toolbox)"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+authors = [{ name = "Gerardo Chowell" }]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.22", "scipy>=1.9", "matplotlib>=3.5"]
+keywords = ["epidemic forecasting", "phenomenological growth models", "parameter estimation", "parametric bootstrap", "weighted interval score"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Repository = "https://github.com/gchowell/GrowthPredict-Toolbox"
+"Tutorial paper" = "https://doi.org/10.1038/s41598-024-51852-8"
+
+[tool.setuptools]
+packages = ["growthpredict"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: end-to-end runs with a bootstrap (deselect with -m 'not slow')"]

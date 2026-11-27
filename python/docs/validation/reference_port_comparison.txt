@@ -1,0 +1,41 @@
+Package (LSODA + SLSQP) against docs/validation/python/gp_port.py (Dormand-Prince + least_squares)
+series 17, windows 46, fits 609 (0 more without a finite objective in one of the two)
+objective equal within 0.0001 (relative): 603
+package lower: 0, package higher: 6
+median |relative difference| 5.1e-09, 95th percentile 1.3e-06
+
+model method   n  equal  package lower  package higher
+EXP   LSQ     46     46              0               0
+EXP   Poisson  41     41              0               0
+GGM   LSQ     46     46              0               0
+GGM   Poisson  41     41              0               0
+GLM   LSQ     46     46              0               0
+GLM   Poisson  41     41              0               0
+GRM   LSQ     46     41              0               5
+GRM   Poisson  41     41              0               0
+LM    LSQ     46     45              0               1
+LM    Poisson  41     41              0               0
+RICH  LSQ     46     46              0               0
+RICH  Poisson  41     41              0               0
+GOM   LSQ     46     46              0               0
+GOM   Poisson  41     41              0               0
+
+fits where the objectives differ:
+  simulated.txt, start row 88, LM, LSQ: package 109.591, reference 22.2979 (relative 3.9)
+      package   [r p a K I0] = [2.5317e-01 1.0000e+00 1.0000e+00 2.0010e+01 1.0000e-02]
+      reference [r p a K I0] = [1.2372e+00 1.0000e+00 1.0000e+00 2.1318e+01 1.0000e-02]
+  weekly-Mpox-cases-US_CDC-05-24-2023.txt, start row 18, GRM, LSQ: package 4501.66, reference 4491.66 (relative 0.0022)
+      package   [r p a K I0] = [1.3783e+03 2.8935e-01 1.0518e-01 1.0149e+04 1.9190e+03]
+      reference [r p a K I0] = [1.5287e+04 3.3799e-01 6.0517e-03 1.0150e+04 1.9190e+03]
+  Most_Recent_Timeseries_US-CDC.txt, start row 6, GRM, LSQ: package 76268.3, reference 76107.1 (relative 0.0021)
+      package   [r p a K I0] = [3.6040e+00 9.8321e-01 9.5070e-02 2.9214e+04 2.6100e+02]
+      reference [r p a K I0] = [4.7681e+00 1.0000e+00 6.0487e-02 2.9209e+04 2.6100e+02]
+  Most_Recent_Timeseries_US-CDC.txt, start row 13, GRM, LSQ: package 21686.4, reference 21674.9 (relative 0.00053)
+      package   [r p a K I0] = [1.9676e+02 5.4269e-01 1.0963e-01 1.8197e+04 3.0270e+03]
+      reference [r p a K I0] = [1.8727e+03 5.9292e-01 7.0337e-03 1.8199e+04 3.0270e+03]
+  sim-GLM-poiss.txt, start row 1, GRM, LSQ: package 671.715, reference 671.415 (relative 0.00045)
+      package   [r p a K I0] = [6.3892e-01 9.9003e-01 1.5285e-01 1.2481e+04 1.0000e+00]
+      reference [r p a K I0] = [7.0696e-01 1.0000e+00 1.2324e-01 1.2896e+04 1.0000e+00]
+  Stochastic SIR simulation results (n=2) Poisson R=10 TimeStep=0.1 Aggregated.txt, start row 1, GRM, LSQ: package 124897, reference 124842 (relative 0.00044)
+      package   [r p a K I0] = [2.6397e+00 9.7043e-01 1.1806e+00 1.0000e+05 1.0000e+00]
+      reference [r p a K I0] = [2.6425e+00 9.7022e-01 1.1825e+00 1.0000e+05 1.0000e+00]
