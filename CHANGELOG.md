@@ -23,6 +23,8 @@ Checked in Python. In MATLAB `runtests('tests')` passes 60 of 60, the three fit 
 - **`adjustLastWindowStart.m`** holds the rule of the runners for the last window start.
 - **`tests/test_forecastPanelGrid.m` and `tests/test_adjustLastWindowStart.m`** (11 tests; no toolbox needed).
 
+- **Python port** in the `python` folder: the package `growthpredict`, with the functions of the code folder under their MATLAB names, the same output file names, 155 tests and its own README. The MATLAB toolbox does not depend on it.
+- 
 ## v1.1.1 (2026-11-26)
 
 ### Rerun
