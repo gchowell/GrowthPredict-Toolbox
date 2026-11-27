@@ -2,7 +2,7 @@
 
 GrowthPredict is a MATLAB toolbox for fitting phenomenological growth models to incidence data and forecasting how many new events will occur in each of the next few observation intervals. Fit one of seven models to a single calibration window, or repeat the analysis across overlapping windows to evaluate forecasts against held-out observations. The toolbox uses a parametric bootstrap to quantify uncertainty in model parameters and predictions.
 
-[Quick start](#quick-start) · [Models](#growth-models) · [Fitting and uncertainty](#fitting-and-uncertainty) · [Outputs and diagnostics](#outputs-and-diagnostics) · [Tutorial paper](https://doi.org/10.1038/s41598-024-51852-8) · [Video tutorials](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
+[Quick start](#quick-start) · [Models](#growth-models) · [Fitting and uncertainty](#fitting-and-uncertainty) · [Outputs and diagnostics](#outputs-and-diagnostics) · [Python version](#python-version) · [Tutorial paper](https://doi.org/10.1038/s41598-024-51852-8) · [Video tutorials](https://www.youtube.com/watch?v=op93_wUeXXA&list=PLiMOXVNNZfvYLdwNKrIdBmH5NTvGk6IG2)
 
 ## Installation
 
@@ -237,6 +237,24 @@ The renewal calculation interpolates incidence on a 0.01-unit grid and uses the 
 Earlier versions of `get_Rt.m` evaluated the gamma and exponential distributions at the time labels themselves, which gave values far too large for any window not starting at time zero, and placed the fixed lag one grid step late. Rerun $R_t$ results from rolling windows, or from series whose time index does not start at zero, that were produced with those versions.
 
 Pair the values returned by `get_Rt` with `ts(2:end)`. The `Rt-*.csv` export has one row per unit of time after the start of the window, labelled with the time each estimate refers to, and ends with the last time of the window. Rows below the 95% coverage threshold are omitted, and the last column gives the coverage of each remaining row. If no time in the window reaches the threshold, the file holds the last time alone and a warning is issued.
+
+## Python version
+
+The `python` folder holds a Python port of the toolbox. Functions keep their MATLAB names and argument order, and results are written to `output/` under the same file names, so the sections above describe it as well. It needs Python with NumPy, SciPy and Matplotlib (tested with Python 3.13); MATLAB is not required. Install it from the repository root, then run the quick start:
+
+```bash
+pip install -e python
+```
+
+```python
+import growthpredict as gp
+
+gp.rng(1)
+gp.Run_Forecasting_GrowthModels(1, 1, 20, 4)
+gp.plotForecast_GrowthModels(1, 1, 20, 4)
+```
+
+The port uses SciPy's optimizer and ODE solver in place of `fmincon` and `ode15s`, and NumPy's random-number generators. On the bundled mpox series its fitted parameters meet the reference values of the MATLAB regression tests within the same tolerances. Bootstrap limits agree within Monte Carlo error; a seeded Python run repeats itself, but does not reproduce the MATLAB run with the same seed. The Python README gives the MATLAB-to-Python equivalents, the differences and the comparison with MATLAB. The scripts in the `legacy` folder are not ported. [Python README](python/README.md) · [Python tests](python/tests)
 
 ## Reproducibility and support
 
