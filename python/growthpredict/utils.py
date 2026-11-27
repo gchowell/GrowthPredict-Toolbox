@@ -151,6 +151,39 @@ def days2weeks(curve):
     return np.array([curve[i : i + 7].sum() for i in range(0, curve.size, 7)])
 
 
+def adjustLastWindowStart(tend1, windowsize1, nObservations):
+    """Last window start that fits in the series (``adjustLastWindowStart.m``).
+
+    Returns ``(tend1, adjusted)``: the requested value, or
+    ``nObservations - windowsize1 + 1`` when a window starting at the requested
+    row would run past the end of the series, and whether it was changed.
+
+    The runners apply this rule before their rolling-window loop and name every
+    file they save with the adjusted value (``...-tend-<tend1>-...``); the
+    plotting functions call it so that they look for the same file names. The
+    result can be below the first window start (for example when the window is
+    longer than the series); the caller then has no window to process.
+    """
+    for value in (tend1, windowsize1, nObservations):
+        if isinstance(value, (bool, str, bytes)) or np.ndim(value) != 0 or not isinstance(
+            value, (int, float, np.integer, np.floating)
+        ):
+            raise GrowthPredictError(
+                "GrowthPredict:adjustLastWindowStart:input",
+                "tend1, windowsize1 and nObservations must be numbers.",
+            )
+
+    adjusted = False
+
+    if (tend1 + windowsize1 - 1) > nObservations:
+
+        tend1 = nObservations - windowsize1 + 1
+
+        adjusted = True
+
+    return tend1, adjusted
+
+
 def num2str(x):
     """Text of a number as MATLAB's ``num2str`` writes it in the file names."""
     if isinstance(x, (bool, np.bool_)):

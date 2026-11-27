@@ -61,6 +61,7 @@ from .options import (
     options_forecast_pois,
 )
 from .plotting import (
+    forecastPanelGrid,
     plot_growth_illustration,
     plotFit_GrowthModels,
     plotFit_ReproductionNumber,
@@ -78,7 +79,16 @@ from .titles import (
     parameterTitleText,
     setParameterTitle,
 )
-from .utils import Struct, days2weeks, example_input_dir, load_timeseries, quantile, rng, smooth
+from .utils import (
+    Struct,
+    adjustLastWindowStart,
+    days2weeks,
+    example_input_dir,
+    load_timeseries,
+    quantile,
+    rng,
+    smooth,
+)
 
 __version__ = "1.1.1"
 

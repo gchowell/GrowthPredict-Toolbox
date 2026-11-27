@@ -170,6 +170,26 @@ else
     windowsize1=windowsize1_INP;
 end
 
+% <==================================================================================>
+% <============ Last window start: the same adjustment as in the runners ============>
+% <==================================================================================>
+% The runners move the last window start back when the series is too short for it and
+% name the files they save with the adjusted value (see adjustLastWindowStart.m).
+
+[tend1,tend1Adjusted]=adjustLastWindowStart(tend1,windowsize1,length(data(:,1)));
+
+if tend1Adjusted
+    fprintf('adjusting tend1 to %d: the last window of %d observations that fits in the series starts at that row\n',tend1,windowsize1);
+end
+
+if tstart1>tend1
+    disp('incompatible tstart and tend values')
+    param_doubling=[];
+    seq_doublingtimes=[];
+    fit_model1=[];
+    return
+end
+
 
 % <=========================================================================================>
 % <================================ Load short-term forecast results ==================================>

@@ -187,6 +187,26 @@ else
 end
 
 % <==================================================================================>
+% <============ Last window start: the same adjustment as in the runners ============>
+% <==================================================================================>
+% The runners move the last window start back when the series is too short for it and
+% name the files they save with the adjusted value (see adjustLastWindowStart.m).
+
+[tend1,tend1Adjusted]=adjustLastWindowStart(tend1,windowsize1,length(data(:,1)));
+
+if tend1Adjusted
+    fprintf('adjusting tend1 to %d: the last window of %d observations that fits in the series starts at that row\n',tend1,windowsize1);
+end
+
+if tstart1>tend1
+    disp('incompatible tstart and tend values')
+    param_doubling=[];
+    seq_doublingtimes=[];
+    forecast_model1=[];
+    return
+end
+
+% <==================================================================================>
 % ============================ Rolling window analysis=====================================>
 % <==================================================================================>
 
@@ -220,19 +240,8 @@ quantilesfs2=[];
 % <=========================================================================================>
 
 
-factors=factor(length(tstart1:1:tend1));
-
-if length(factors)==1
-    rows=factors;
-    cols=1;
-
-elseif length(factors)==3
-    rows=factors(1)*factors(2);
-    cols=factors(3);
-else
-    rows=factors(1);
-    cols=factors(2);
-end
+% Layout of figure 400, one panel per window (see forecastPanelGrid.m).
+[rows,cols]=forecastPanelGrid(length(tstart1:1:tend1));
 
 
 cc1=1;
@@ -240,7 +249,18 @@ cc1=1;
 for i=tstart1:1:tend1  %rolling window analysis
 
     if (tend1-tstart1)>10
-        close all
+
+        % Many windows: close the figures of the previous windows, as before, but
+        % keep figure 400, which gets one panel per window. (close all removed it
+        % at every window, so it ended with the panel of the last window only.)
+        openFigures=findobj(groot,'Type','figure');
+
+        for kFigure=1:numel(openFigures)
+            if ~isequal(get(openFigures(kFigure),'Number'),400)
+                close(openFigures(kFigure))
+            end
+        end
+
     end
 
     % Resetting the array for quantiles
@@ -718,7 +738,7 @@ if tend1>tstart1
     plot(tstart1:1:tend1,param_as2(:,1),'ro-')
     hold on
     plot(tstart1:1:tend1,param_as2(:,2),'b--')
-    plot(tstart1:1:tend1,param_as(:,3),'b--')
+    plot(tstart1:1:tend1,param_as2(:,3),'b--')
 
     line1=plot(tstart1:1:tend1,smooth(param_as2(:,1),5),'k--');
     set(line1,'LineWidth',3)

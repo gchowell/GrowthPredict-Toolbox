@@ -2,6 +2,27 @@
 
 Versions follow the tags of this repository. Entries list what changed for a user of the toolbox; "Rerun" says which earlier results are affected.
 
+## Unreleased
+
+Checked in Python. In MATLAB `runtests('tests')` passes 60 of 60, the three fit plotting functions were run with an adjusted last window start and `plotForecast_GrowthModels.m` with 16 windows (figure 400: 16 panels, 4-by-4). See `docs/validation/plot-windows.md`.
+
+### Rerun
+
+- **Nothing.** No fitted value, forecast or exported number changes.
+
+### Fixed
+
+- **`plotForecast_GrowthModels.m`: panel of forecasts (figure 400) with 16, 24, 32, 36, 40, 48, … windows.** The grid had fewer panels than windows whenever the number of windows has four or more prime factors, and the function stopped at the fifth window. The grid now comes from `forecastPanelGrid.m`. Layouts for other counts are unchanged (six windows: 2-by-3).
+- **`plotForecast_GrowthModels.m`: figure 400 with more than 11 windows** kept the panel of the last window only, because `close all` at each window closed it too. The other figures are still closed at each window; figure 400 is kept.
+- **Plotting functions after a run in which the runner moved the last window start back** (`plotFit_GrowthModels.m`, `plotForecast_GrowthModels.m`, `plotFit_ReproductionNumber.m`, `plotForecast_ReproductionNumber.m`, `plotRt.m`). When the series is too short for the requested `tend1`, the runners use the last window that fits and name their files with it; the plotting functions used the requested value and looked for files that had not been written. They now apply the same rule (`adjustLastWindowStart.m`). With no window left they print `incompatible tstart and tend values` and return empty outputs, like the runners.
+- **`plotForecast_GrowthModels.m` and `plotForecast_ReproductionNumber.m`: rolling-parameter figure.** The upper limit of `a` was read from `param_as` instead of `param_as2`. The two arrays hold the same rows when the figure is drawn, so no figure changes.
+
+### Added
+
+- **`forecastPanelGrid.m`** gives the rows and columns of figure 400 for any number of windows.
+- **`adjustLastWindowStart.m`** holds the rule of the runners for the last window start.
+- **`tests/test_forecastPanelGrid.m` and `tests/test_adjustLastWindowStart.m`** (11 tests; no toolbox needed).
+
 ## v1.1.1 (2026-11-26)
 
 ### Rerun

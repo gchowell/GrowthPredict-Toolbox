@@ -38,8 +38,16 @@ Run by the maintainer on 25 Nov 2026 from `forecasting_growthmodels code`, on th
 
 The Python fit uses the fitted curve where MATLAB reports the median of bootstrap curves, and SciPy in place of `fmincon`, so small differences are expected.
 
+## After v1.1.1
+
+| Change | Note | MATLAB tests |
+| --- | --- | --- |
+| Figure 400 with 16, 24, 32, … windows; rolling-parameter figure; last window start in the plotting functions | [plot-windows.md](plot-windows.md) | `tests/test_forecastPanelGrid.m` (6), `tests/test_adjustLastWindowStart.m` (5) |
+
+Checked in Python on 27 Nov 2026: 35 of 35 checks of `python/test_plot_windows.py`, and the end-to-end tests of the Python port in the repository's `python` folder. Run in MATLAB by the maintainer on the same day: `runtests('tests')` passes 60 of 60 across the nine test files (the 49 above and the 11 new ones), `plotFit_GrowthModels`, `plotFit_ReproductionNumber` and `plotRt` called with `(12,20,20,…)` after `Run_Fit_GrowthModels(12,20,20)` use windows 12 to 13, and `plotForecast_GrowthModels(1,16,10,4)` draws figure 400 with 16 panels in a 4-by-4 grid. The two forecast plotting functions have not been run with an adjusted last window start.
+
 ## Running the Python scripts
 
-From the repository root, with Python 3 and `pip install numpy scipy numba`. Each note ends with its own commands. `python/gp_port.py` is the port of `fit_model.m`, `python/rt_port.py` of `get_Rt.m` and `selectRtRows.m`, and `python/dt_port.py` of `getDoublingTimeCurve.m`.
+From the repository root, with Python 3 and `pip install numpy scipy numba`. Each note ends with its own commands. `python/gp_port.py` is the port of `fit_model.m`, `python/rt_port.py` of `get_Rt.m` and `selectRtRows.m`, `python/dt_port.py` of `getDoublingTimeCurve.m`, and `python/plot_port.py` of `forecastPanelGrid.m` and `adjustLastWindowStart.m`.
 
 The file with one line per fit of the comparison in `r-interval.md` (`matrix.jsonl`, 3 MB) is not kept here; `python/run_matrix.py` regenerates it in about 40 minutes on two cores.

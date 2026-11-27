@@ -111,10 +111,10 @@ Things that change with the language:
 | `doubling.py` | `getDoublingTimeCurve` |
 | `options.py` | `options_fit*.m` (11) and `options_forecast*.m` (8) |
 | `runners.py` | `Run_Fit_GrowthModels`, `Run_Forecasting_GrowthModels` |
-| `plotting.py` | `plotFit_GrowthModels`, `plotForecast_GrowthModels`, `plotFit_ReproductionNumber`, `plotForecast_ReproductionNumber`, `plotRt`, `plotGrowthModel`, `plot_growth_illustration` |
+| `plotting.py` | `plotFit_GrowthModels`, `plotForecast_GrowthModels`, `plotFit_ReproductionNumber`, `plotForecast_ReproductionNumber`, `plotRt`, `plotGrowthModel`, `plot_growth_illustration`, `forecastPanelGrid` |
 | `titles.py` | `parameterTitleText`, `setParameterTitle`, `fitParameterTitles`, `addEstimateLine`, `GetAdjustedFontSize` |
 | `make_readme_figures.py` | `make_readme_figures` |
-| `utils.py`, `io.py` | `days2weeks`; MATLAB's `quantile`, `smooth`, `load`, `save` and `writetable` |
+| `utils.py`, `io.py` | `days2weeks`, `adjustLastWindowStart`; MATLAB's `quantile`, `smooth`, `load`, `save` and `writetable` |
 
 The scripts in `forecasting_growthmodels code/legacy` are not ported.
 
@@ -168,31 +168,31 @@ The models, objectives, parameter bounds, seed, start-point design, bootstrap, s
 | MAT files | Whole workspace | The variables used downstream | See [Outputs](#outputs). |
 | Figures | Font size 24, `figure` numbers assigned by MATLAB for the summary | Font size 18 (`gp.titles.BASE_FONT_SIZE`), summary figure is number 300; powers of ten go into the axis label, e.g. `K (×10⁴)` | Appearance only. |
 
-Three behaviours of the MATLAB files were not carried over:
+Three points where the port first departed from MATLAB v1.1.1 are now the same in both, because the MATLAB plotting functions were corrected (see [plot-windows.md](../docs/validation/plot-windows.md)):
 
-- **Panel of forecasts with 16, 24, 32, … windows.** `plotForecast_GrowthModels` takes the rows and columns of figure 400 from the prime factors of the number of windows; with four or more factors it has too few panels and stops. The port falls back to a near-square grid.
-- **`param_as` in the rolling-parameter figure.** The upper limit of `a` is read from `param_as` where the other panels use `param_as2`. The port uses the same source for all four panels.
-- **Last window start in the plotting functions.** The runners move `tend1` back when the series is too short for it; the plotting functions do not, and then look for a file name that was never written. The port applies the same adjustment in both.
+- **Panel of forecasts with 16, 24, 32, … windows.** Figure 400 takes its rows and columns from `forecastPanelGrid`, which has a panel for every window, and it is kept open when the figures of earlier windows are closed.
+- **Rolling-parameter figure.** All four panels read the arrays rebuilt from the plotted windows.
+- **Last window start in the plotting functions.** They apply the rule of the runners (`adjustLastWindowStart`), so they look for the file names the runner wrote.
 
-A runner called with a first window beyond the last possible one returns empty results with a warning (MATLAB prints a message and returns without its outputs). A plotting function called before its runner raises `FileNotFoundError` naming the file it looked for.
+A runner or plotting function called with a first window beyond the last possible one returns empty results with a warning (`GrowthPredict:windows`); MATLAB prints `incompatible tstart and tend values`. A plotting function called before its runner raises `FileNotFoundError` naming the file it looked for.
 
 ## Tests and validation
 
 From the `python` folder:
 
 ```bash
-python -m pytest                    # 137 tests, about 2 minutes
-python -m pytest -m "not slow"      # 112 tests without the end-to-end runs, about 20 seconds
+python -m pytest                    # 155 tests, about 2.5 minutes
+python -m pytest -m "not slow"      # 123 tests without the end-to-end runs, about 20 seconds
 ```
 
 | Test file | What it checks |
 | --- | --- |
-| `test_getRt.py`, `test_selectRtRows.py`, `test_optionsRt.py`, `test_doublingTime.py`, `test_gompertz.py`, `test_rInterval.py`, `test_parameterTitle.py` | The seven MATLAB test files of `forecasting_growthmodels code/tests`, test for test, with the same reference values and tolerances |
+| `test_getRt.py`, `test_selectRtRows.py`, `test_optionsRt.py`, `test_doublingTime.py`, `test_gompertz.py`, `test_rInterval.py`, `test_parameterTitle.py`, `test_forecastPanelGrid.py`, `test_adjustLastWindowStart.py` | The nine MATLAB test files of `forecasting_growthmodels code/tests`, test for test, with the same reference values and tolerances |
 | `test_models_objective.py` | Closed-form solutions of the exponential, generalized-growth, logistic, Richards and Gompertz models; Poisson and negative-binomial objectives against `scipy.stats`; AICc and parameter counts |
 | `test_fit_model_options.py` | Outputs of `fit_model`, supplied bounds, optimizer settings, bounds of the error model, input checks |
 | `test_noise_metrics.py` | Mean and variance of the six noise models; MATLAB's quantile definition; WIS, coverage, MAE and MSE against a direct calculation; bound-hit fractions |
 | `test_utils_options.py` | Data loader, cumulative files, moving average, the 19 options functions |
-| `test_runners.py` | Runners and plotting functions end to end: file names, table layouts, the README quick start, every estimation method and model, rolling windows, forecasts beyond the data, messages |
+| `test_runners.py` | Runners and plotting functions end to end: file names, table layouts, the README quick start, every estimation method and model, rolling windows, 16 and 24 windows in one panel figure, a last window start beyond the series, forecasts beyond the data, messages |
 
 ### Agreement with the MATLAB toolbox
 
@@ -206,6 +206,7 @@ U.S. mpox series, GLM unless stated, least squares. "Reference" is the target in
 | Fit, rows 13–32: r, p, K, sum of squares | 801.8, 0.178, 18,153, 2.323e4 (M) | 802.7, 0.1775, 18,153, 2.3225e4 |
 | Same fit with `rBounds = [1e-3 10]` | r = 10, p = 0.676, 9.51e5 (M) | r = 10, p = 0.676, 9.51e5 |
 | Fit, rows 8–27: r, sum of squares | 26.97, 9.24e4 | 26.97, 9.238e4 |
+| Mean AICc of the fits to rows 12–31 and 13–32 (M, run of 27 Nov 2026) | 202.2048 (M) | 202.2040 |
 | Gompertz fit, rows 1–20: r, a, sum of squares | 1.4738, 0.18763, 2.71708e6 | 1.4737, 0.18762, 2.71708e6 |
 | Gompertz fit, rows 13–32: r, a, sum of squares | 0.6732, 0.3939, 4.525e5 (M) | 0.6732, 0.3939, 4.525e5 |
 | Rows 1–20, bootstrap: r | 1.7 (1.5, 2.1) (M) | 1.73 (1.47, 2.06) |

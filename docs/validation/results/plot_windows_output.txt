@@ -1,0 +1,66 @@
+=== 1. Panel of forecasts (figure 400): rows and columns for n windows
+  former grid has fewer panels than windows for 43 of the counts 1..200: [16, 24, 32, 36, 40, 48, 54, 56, 60, 64, 72, 80, 81, 84, 88, 90] ...
+  [PASS] these are exactly the counts with four or more prime factors
+  [PASS] new grid: rows*cols equals the number of windows for every count 1..1000
+  [PASS] new grid is the former grid for every count with at most three prime factors (1..1000)
+  [PASS] README example and other small counts unchanged: 6 -> 2x3, 1 -> 1x1, 7 -> 7x1, 12 -> 4x3
+  [PASS] four or more prime factors: rows is the largest divisor not above the square root (brute force, 1..1000)
+  windows   former grid (panels)   new grid
+       16   2x2 ( 4)              4x4
+       24   2x2 ( 4)              4x6
+       32   2x2 ( 4)              4x8
+       36   2x2 ( 4)              6x6
+       40   2x2 ( 4)              5x8
+       48   2x2 ( 4)              6x8
+       54   2x3 ( 6)              6x9
+       56   2x2 ( 4)              7x8
+       60   2x2 ( 4)              6x10
+       64   2x2 ( 4)              8x8
+       72   2x2 ( 4)              8x9
+       80   2x2 ( 4)              8x10
+       81   3x3 ( 9)              9x9
+       96   2x2 ( 4)              8x12
+      100   2x2 ( 4)              10x10
+
+=== 2. The same calls as plotForecast_GrowthModels.m, with Matplotlib subplots
+  [PASS]  6 windows: former grid -> 6 panels; new grid -> 6 panels
+  [PASS] 12 windows: former grid -> 12 panels; new grid -> 12 panels
+  [PASS] 16 windows: former grid -> stops: num must be an integer with 1 <= num <= 4, not 5; new grid -> 16 panels
+  [PASS] 24 windows: former grid -> stops: num must be an integer with 1 <= num <= 4, not 5; new grid -> 24 panels
+  [PASS] 32 windows: former grid -> stops: num must be an integer with 1 <= num <= 4, not 5; new grid -> 32 panels
+
+=== 3. Last window start: plotting functions against runners
+  [PASS] adjusted value is the latest start not above the request whose window ends inside the series (4320 cases, brute force)
+  [PASS] not adjusted: README quick start (windows 1-1 of 20, 32 rows)
+  [PASS] not adjusted: README rolling windows (windows 1-6 of 20, 32 rows)
+  [PASS] not adjusted: README last 20 observations (windows 13-13 of 20, 32 rows)
+  [PASS] not adjusted: options_fit_cholera (windows 1-80 of 10, 107 rows)
+  Run_Fit_GrowthModels(1,20,20), U.S. mpox series (32 rows): the runner adjusts tend1 to 13
+    runner writes          Forecast-growthModel-Most_Recent_Timeseries_US-CDC.txt-flag1-1-fixI0-1-method-0-dist-0-tstart-1-tend-13-calibrationperiod-20-forecastingperiod-0.mat
+    plot function, before  Forecast-growthModel-Most_Recent_Timeseries_US-CDC.txt-flag1-1-fixI0-1-method-0-dist-0-tstart-1-tend-20-calibrationperiod-20-forecastingperiod-0.mat
+    plot function, after   Forecast-growthModel-Most_Recent_Timeseries_US-CDC.txt-flag1-1-fixI0-1-method-0-dist-0-tstart-1-tend-13-calibrationperiod-20-forecastingperiod-0.mat
+  [PASS] the plotting function now asks for the file the runner wrote
+  [PASS] options_fit_mpox.m as shipped (row 37 of 32): adjusted to 13, below tstart1 = 37, so nothing to plot
+  [PASS] window longer than the series: result -7, nothing to plot
+
+=== 4. Expected values in the MATLAB test files agree with the ports
+  [PASS] test_forecastPanelGrid.m: the 15 layouts of testCountsThatUsedToFail
+  [PASS]   and the former grid was too small for each of them
+  [PASS] test_adjustLastWindowStart.m: the 8 hard-coded cases
+
+=== 5. MATLAB sources
+  [PASS] adjustLastWindowStart.m: condition and value
+  [PASS] Run_Fit_GrowthModels.m: the same condition and value, with nObservations = length(data(:,1))
+  [PASS] Run_Forecasting_GrowthModels.m: the same condition and value, with nObservations = length(data(:,1))
+  [PASS] plotFit_GrowthModels.m: one call, after the data and the window length are known and before tend1 is used; with no window to plot it returns empty param_doubling, seq_doublingtimes, fit_model1
+  [PASS] plotForecast_GrowthModels.m: one call, after the data and the window length are known and before tend1 is used; with no window to plot it returns empty param_doubling, seq_doublingtimes, forecast_model1
+  [PASS] plotFit_ReproductionNumber.m: one call, after the data and the window length are known and before tend1 is used; with no window to plot it returns empty param_R, param_doubling, seq_doublingtimes
+  [PASS] plotForecast_ReproductionNumber.m: one call, after the data and the window length are known and before tend1 is used; with no window to plot it returns empty param_R, param_doubling, seq_doublingtimes
+  [PASS] plotRt.m: one call, after the data and the window length are known and before tend1 is used; with no window to plot it returns empty Rts, params, performanceC, AICcs
+  [PASS] plotForecast_GrowthModels.m: rolling-parameter figure reads ['param_Ks2', 'param_as2', 'param_ps2', 'param_rs2'] only (16 uses)
+  [PASS] plotForecast_ReproductionNumber.m: rolling-parameter figure reads ['param_Ks2', 'param_as2', 'param_ps2', 'param_rs2'] only (16 uses)
+  [PASS] plotForecast_GrowthModels.m: figure 400 takes its grid from forecastPanelGrid.m
+  [PASS] plotForecast_GrowthModels.m: inside the window loop figure 400 is no longer closed
+  [PASS] forecastPanelGrid.m: the statements ported in plot_port.py
+
+ALL CHECKS PASSED

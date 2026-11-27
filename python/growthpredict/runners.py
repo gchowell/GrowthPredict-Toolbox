@@ -25,7 +25,7 @@ from .fitting import fit_model, initialParams
 from .metrics import boundHitFractions, computeforecastperformance, computeQuantiles, computeWIS
 from .noise import AddErrorStructure, estimatePearsonDispersion
 from .options import options_fit, options_forecast, resolve_options
-from .utils import get_rng, load_timeseries, quantile
+from .utils import adjustLastWindowStart, get_rng, load_timeseries, quantile
 
 __all__ = ["Run_Fit_GrowthModels", "Run_Forecasting_GrowthModels"]
 
@@ -262,11 +262,10 @@ def _run(
 
     nrows = data.shape[0]
 
-    if (tend1 + windowsize1 - 1) > nrows:
+    tend1, tend1Adjusted = adjustLastWindowStart(tend1, windowsize1, nrows)
 
-        tend1 = nrows - windowsize1 + 1
-        if verbose:
-            print("adjusting tend1")
+    if tend1Adjusted and verbose:
+        print("adjusting tend1")
 
     if tstart1 > tend1:
         warn(

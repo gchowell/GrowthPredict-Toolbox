@@ -40,7 +40,7 @@ from .options import options_fit, options_forecast, resolve_options
 from .rt import get_Rt, options_Rt, selectRtRows
 from .runners import print_options_summary
 from .titles import GetAdjustedFontSize, addEstimateLine, setParameterTitle
-from .utils import load_timeseries, quantile, smooth
+from .utils import adjustLastWindowStart, load_timeseries, quantile, smooth
 
 __all__ = [
     "plotFit_GrowthModels",
@@ -51,6 +51,7 @@ __all__ = [
     "plotGrowthModel",
     "plot_growth_illustration",
     "draw_window_figure",
+    "forecastPanelGrid",
 ]
 
 _HIST_COLOR = (0.2422, 0.1504, 0.6603)
@@ -162,6 +163,25 @@ def _draw_fit_panel(ax, timevect1, timevect2, forecast_model12, fit_model1, time
     return median1, LB1, UB1
 
 
+def _histogram(ax, values):
+    """Ten-bin histogram of the bootstrap values of one parameter, like MATLAB's ``hist``.
+
+    Values that are equal, or equal up to rounding error (a parameter that every
+    refit leaves on the same bound, for example), have no range to divide into
+    ten bins; they are drawn as one bar around their common value.
+    """
+    v = np.asarray(values, dtype=float)
+    v = v[np.isfinite(v)]
+    limits = None
+    if v.size:
+        lo, hi = float(v.min()), float(v.max())
+        if hi - lo <= 1e-10 * max(1.0, abs(lo), abs(hi)):
+            centre = 0.5 * (lo + hi)
+            half = max(0.5, 1e-6 * abs(centre))
+            limits = (centre - half, centre + half)
+    ax.hist(v, bins=10, range=limits, color=_HIST_COLOR, edgecolor="k", linewidth=0.5)
+
+
 def draw_window_figure(
     num, *, Phatss_model1, params, timevect1, timevect2, forecast_model12, fit_model1, timevect_all, data_all,
     forecastingperiod, ylabel, model_name1, all_ylabels=True,
@@ -185,7 +205,7 @@ def draw_window_figure(
 
         ax = fig.add_subplot(gs[0, k])
         values = Phatss_model1[:, k]
-        ax.hist(values[np.isfinite(values)], bins=10, color=_HIST_COLOR, edgecolor="k", linewidth=0.5)
+        _histogram(ax, values)
 
         ax.plot([param[1], param[2]], [10, 10], "r--", linewidth=2)
         addEstimateLine(param[0], ax)  # fitted estimate
@@ -274,24 +294,66 @@ def _write_doubling(names, i, seq_doublingtimes):
     )
 
 
-def _subplot_grid(n):
-    """Rows and columns of the panel of forecasts, from the prime factors of n as in MATLAB."""
+def forecastPanelGrid(nWindows):
+    """Rows and columns of the panel with one forecast per window (``forecastPanelGrid.m``).
+
+    Returns ``(rows, cols)`` with ``rows*cols == nWindows``, so that every
+    window has a panel in figure 400 and no panel is left empty. The layout
+    comes from the prime factors of ``nWindows``, f1 <= f2 <= ...:
+
+        one factor (1 or a prime)   nWindows-by-1
+        two factors                 f1-by-f2              (6 windows: 2-by-3)
+        three factors               (f1*f2)-by-f3         (12 windows: 4-by-3)
+        four or more factors        d-by-(nWindows/d), d the largest divisor of
+                                    nWindows not above its square root
+                                    (16: 4-by-4, 24: 4-by-6, 32: 4-by-8)
+    """
+    ok = not isinstance(nWindows, (bool, str, bytes)) and np.ndim(nWindows) == 0
+    if ok:
+        try:
+            ok = math.isfinite(nWindows) and nWindows >= 1 and nWindows == round(nWindows)
+        except TypeError:
+            ok = False
+    if not ok:
+        raise GrowthPredictError("GrowthPredict:forecastPanelGrid:nWindows", "nWindows must be a positive integer.")
+
+    nWindows = int(nWindows)
+
     factors = []
-    m, f = n, 2
+    m, f = nWindows, 2
     while m > 1:
         while m % f == 0:
             factors.append(f)
             m //= f
         f += 1
-    if len(factors) <= 1:
-        rows, cols = (factors[0] if factors else 1), 1
-    elif len(factors) == 3:
-        rows, cols = factors[0] * factors[1], factors[2]
-    else:
+
+    if len(factors) <= 1:  # 1 or a prime
+
+        rows, cols = nWindows, 1
+
+    elif len(factors) == 2:
+
         rows, cols = factors[0], factors[1]
-    if rows * cols < n:  # four or more prime factors (16, 24, ...): MATLAB runs out of panels
-        cols = int(math.ceil(math.sqrt(n)))
-        rows = int(math.ceil(n / cols))
+
+    elif len(factors) == 3:
+
+        rows, cols = factors[0] * factors[1], factors[2]
+
+    else:
+
+        # Four or more prime factors: the pair of divisors closest to a square.
+        rows = 1
+
+        for d in range(2, nWindows + 1):
+
+            if d * d > nWindows:
+                break
+
+            if nWindows % d == 0:
+                rows = d
+
+        cols = nWindows // rows
+
     return rows, cols
 
 
@@ -363,10 +425,18 @@ def _setup(tstart1_pass, tend1_pass, windowsize1_pass, forecastingperiod_pass, o
         s.getperformance = True
         s.forecastingperiod = 0
 
-    # The runner moves the last window start back when the series is too short for it;
-    # do the same here so that the file names match.
-    if (s.tend1 + s.windowsize1 - 1) > s.data.shape[0]:
-        s.tend1 = s.data.shape[0] - s.windowsize1 + 1
+    # The runners move the last window start back when the series is too short for it and
+    # name the files they save with the adjusted value (see adjustLastWindowStart).
+    s.tend1, tend1Adjusted = adjustLastWindowStart(s.tend1, s.windowsize1, s.data.shape[0])
+
+    s.nothing_to_plot = s.tstart1 > s.tend1
+    if s.nothing_to_plot:
+        warn(
+            "GrowthPredict:windows",
+            "incompatible tstart and tend values: the first window starts at row %d, the last possible "
+            "window of %d observations starts at row %d. Nothing to plot." % (s.tstart1, s.windowsize1, s.tend1),
+            stacklevel=5,
+        )
 
     s.names = gpio.OutputNames(
         output_dir, s.cadfilename1, opts.flag1, opts.fixI0, opts.method1, opts.dist1, s.windowsize1,
@@ -579,6 +649,8 @@ def _plot_fit(tstart1_pass, tend1_pass, windowsize1_pass, options_pass, optionsR
     plt.close("all")
 
     s = _setup(tstart1_pass, tend1_pass, windowsize1_pass, None, options_pass, False, input_dir, output_dir)
+    if s.nothing_to_plot:
+        return np.zeros((0, 5)), np.zeros(0), np.zeros((0, 5)), np.zeros((0, 0))
     opts = s.opts
     fs = GetAdjustedFontSize()
 
@@ -758,6 +830,8 @@ def _plot_forecast(tstart1_pass, tend1_pass, windowsize1_pass, forecastingperiod
     s = _setup(
         tstart1_pass, tend1_pass, windowsize1_pass, forecastingperiod_pass, options_pass, True, input_dir, output_dir
     )
+    if s.nothing_to_plot:
+        return np.zeros((0, 5)), np.zeros(0), np.zeros((0, 5)), np.zeros((0, 0))
     opts = s.opts
     fs = GetAdjustedFontSize()
     getperformance = s.getperformance
@@ -767,7 +841,7 @@ def _plot_forecast(tstart1_pass, tend1_pass, windowsize1_pass, forecastingperiod
     if with_rt:
         optionsRt = (options_Rt if optionsRt_pass is None else optionsRt_pass)()
 
-    rows, cols = _subplot_grid(len(s.windows))
+    rows, cols = forecastPanelGrid(len(s.windows))  # layout of figure 400, one panel per window
 
     acc = {k: [] for k in ("param_rs", "param_as", "param_ps", "param_Ks", "MAECSS", "MSECSS", "PICSS", "WISCSS",
                            "MAEFSS", "MSEFSS", "PIFSS", "WISFSS")}  # fmt: skip
@@ -1025,6 +1099,8 @@ def plotRt(tstart1_pass=None, tend1_pass=None, windowsize1_pass=None, options_pa
     plt.close("all")
 
     s = _setup(tstart1_pass, tend1_pass, windowsize1_pass, None, options_pass, False, input_dir, output_dir)
+    if s.nothing_to_plot:
+        return np.zeros((0, 4)), np.zeros((0, 0)), np.zeros((0, 0)), np.zeros((0, 5))
     opts = s.opts
     fs = 0.75 * GetAdjustedFontSize()
     tstart1, tend1, windowsize1 = s.tstart1, s.tend1, s.windowsize1

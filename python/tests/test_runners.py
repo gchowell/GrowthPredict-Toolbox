@@ -560,3 +560,173 @@ def test_growth_model_illustrations():
     assert len(fig.get_axes()) == 4
     assert [ax.get_title() for ax in fig.get_axes()] == [
         "Generalized Logistic Growth Model", "Generalized Richards Model", "Logistic Growth Model", "Richards Model"]  # fmt: skip
+
+
+# ---------------------------------------------------------------- three corrections to the plotting functions
+# (1) figure 400 with 16 or 24 windows, (2) rolling-parameter figure, (3) last window start beyond the series.
+# The MATLAB plotting functions were corrected in the same way; see docs/validation/plot-windows.md.
+
+
+def _lines(ax):
+    """x and y data of the plotted lines of an axes, in drawing order."""
+    return [(np.asarray(line.get_xdata(), dtype=float), np.asarray(line.get_ydata(), dtype=float)) for line in ax.get_lines()]
+
+
+@pytest.mark.parametrize(
+    "nwin,grid,options,windowsize1",
+    [(16, (4, 4), gp.options_forecast, 10), (24, (4, 6), gp.options_forecast_cholera, 10)],
+)
+def test_panel_of_forecasts_with_many_windows(tmp_path, nwin, grid, options, windowsize1):
+    # MATLAB v1.1.1 stopped here: with 16 or 24 windows the grid of figure 400 was 2-by-2.
+    out = str(tmp_path)
+    opts = options().replace(B=2, numstartpoints=3)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        AICcs, _ = gp.Run_Forecasting_GrowthModels(1, nwin, windowsize1, 4, opts, output_dir=out, plot=False, verbose=False)
+        gp.plotForecast_GrowthModels(1, nwin, windowsize1, 4, opts, output_dir=out, verbose=False)
+    assert AICcs.shape[0] == nwin
+
+    # more than 11 windows: the figures of earlier windows are closed, figure 400 keeps every panel
+    assert plt.get_fignums() == [100 + nwin, 200 + nwin, 300, 400]
+    panels = plt.figure(400).get_axes()
+    assert len(panels) == nwin
+    assert panels[0].get_subplotspec().get_gridspec().get_geometry() == grid
+    data, _ = gp.load_timeseries(opts.cadfilename1)
+    for k, ax in enumerate(panels):
+        # panel k shows the window that starts at row k + 1: its x-axis runs over calibration and forecast times
+        np.testing.assert_allclose(ax.get_xlim(), [data[k, 0], data[k + windowsize1 + 3, 0]])
+        assert len(ax.collections) == 2 and len(ax.get_lines()) >= 5  # trajectories, fits, limits, data, window end
+    assert [ax.get_xlabel() for ax in panels] == [""] * (nwin - grid[1]) + ["Time"] * grid[1]  # bottom row only
+    assert panels[0].get_ylabel() == "%s %s" % (opts.caddisease, opts.datatype)
+
+    # one trajectory table per window
+    for i in (1, nwin):
+        assert os.path.isfile(os.path.join(
+            out, "Forecast-flag1-1-fixI0-1-method-0-dist-0-tstart-%d-calibrationperiod-%d-horizon-4-%s-%s.csv"
+            % (i, windowsize1, opts.caddisease, opts.datatype)))  # fmt: skip
+
+
+def test_rolling_parameter_figure_reads_one_set_of_arrays(rolling):
+    # Each of the four lower panels (r, a, p, K) shows the estimate, its two limits and the smoothed
+    # estimate of the SAME parameter, taken from the windows that were plotted.
+    out = rolling["out"]
+    run_quiet(gp.plotForecast_GrowthModels, 1, 3, 20, 4, rolling["opts"], output_dir=out)
+    _, params = table(out, "parameters-rollingwindow-%s-tstart-1-tend-3-calibrationperiod-20-horizon-4-Mpox-cases.csv" % QUICK)
+    columns = {"r": 1, "p": 4, "a": 7, "K": 10}
+
+    axes = plt.figure(300).get_axes()
+    assert [ax.get_ylabel().split(" ")[0] for ax in axes[1:]] == ["r", "a", "p", "K"]
+    for ax in axes[1:]:
+        c = columns[ax.get_ylabel().split(" ")[0]]
+        lines = _lines(ax)
+        assert len(lines) == 4
+        for x, _ in lines:
+            assert x.tolist() == [1, 2, 3]
+        np.testing.assert_allclose(lines[0][1], params[:, c], rtol=1e-12)  # estimate
+        np.testing.assert_allclose(lines[1][1], params[:, c + 1], rtol=1e-12)  # lower limit
+        np.testing.assert_allclose(lines[2][1], params[:, c + 2], rtol=1e-12)  # upper limit, same parameter
+        np.testing.assert_allclose(lines[3][1], gp.smooth(params[:, c], 5), rtol=1e-12)  # smoothed estimate
+
+    # the same holds for the forecast plot with the reproduction number
+    run_quiet(gp.plotForecast_ReproductionNumber, 1, 3, 20, 4, rolling["opts"], gp.options_Rt, output_dir=out)
+    axes = plt.figure(300).get_axes()
+    a_panel = [ax for ax in axes[1:] if ax.get_ylabel() == "a"][0]
+    np.testing.assert_allclose(_lines(a_panel)[2][1], params[:, 9], rtol=1e-12)
+
+
+def test_last_window_start_beyond_the_series_fit(tmp_path, mpox):
+    # 32 rows, windows of 20: the last window that fits starts at row 13. The runner moves tend1 = 20
+    # back to 13 and names its files with tend-13; the plotting functions must look for the same names.
+    out = str(tmp_path)
+    opts = gp.options_fit().replace(B=3, numstartpoints=4)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        AICcs, _ = gp.Run_Fit_GrowthModels(12, 20, 20, opts, output_dir=out, plot=False, verbose=False)
+    assert AICcs[:, 0].tolist() == [12, 13]
+    mats = sorted(f for f in os.listdir(out) if f.startswith("Forecast-growthModel-"))
+    assert [("-tstart-%d-tend-13-" % i) in f for i, f in zip((12, 13), mats)] == [True, True]
+    assert not any("-tend-20-" in f for f in os.listdir(out))
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        param_doubling, seq, fits = gp.plotFit_GrowthModels(12, 20, 20, opts, output_dir=out, verbose=False)
+        assert plt.get_fignums() == [113, 114, 300]
+        assert fits.shape == (20, 3) and param_doubling.shape == (3,)
+        param_R, _, _ = gp.plotFit_ReproductionNumber(12, 20, 20, opts, gp.options_Rt, output_dir=out, verbose=False)
+        assert plt.get_fignums() == [113, 114, 300, 501, 502]
+        assert param_R[:, 0].tolist() == [30, 31]  # last time of the windows starting at rows 12 and 13
+        Rts, params, performanceC, AICcs2 = gp.plotRt(12, 20, 20, opts, gp.options_Rt, output_dir=out, verbose=False)
+    assert Rts[:, 0].tolist() == [30, 31] and params[:, 0].tolist() == [12, 13] and performanceC.shape == (2, 6)
+    np.testing.assert_allclose(AICcs2, AICcs, rtol=1e-12)
+
+    # every table is named with the adjusted value, and the same result comes from asking for it directly
+    assert all("-tend-13-" in f for f in os.listdir(out) if "rollingwindow" in f or f.startswith(("Rts-", "performance-")))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        _, _, fits13 = gp.plotFit_GrowthModels(12, 13, 20, opts, output_dir=out, verbose=False)
+    np.testing.assert_allclose(fits13, fits)
+
+
+def test_last_window_start_beyond_the_series_forecast(tmp_path):
+    # Forecasts beyond the data (getperformance = 0): tend1 = 20 is moved back to 13.
+    out = str(tmp_path)
+    opts = gp.options_forecast().replace(B=3, numstartpoints=4, getperformance=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        AICcs, _ = gp.Run_Forecasting_GrowthModels(12, 20, 20, 3, opts, output_dir=out, plot=False, verbose=False)
+        _, _, fc = gp.plotForecast_GrowthModels(12, 20, 20, 3, opts, output_dir=out, verbose=False)
+        assert plt.get_fignums() == [112, 113, 300, 400]
+        param_R, _, _ = gp.plotForecast_ReproductionNumber(12, 20, 20, 3, opts, gp.options_Rt, output_dir=out, verbose=False)
+    assert AICcs[:, 0].tolist() == [12, 13] and fc.shape == (23, 3) and param_R.shape == (2, 5)
+    assert len(plt.figure(300).get_axes()) == 5
+    _, traj = table(out, "Forecast-flag1-1-fixI0-1-method-0-dist-0-tstart-13-calibrationperiod-20-horizon-3-Mpox-cases.csv")
+    assert traj.shape == (23, 5) and np.all(np.isnan(traj[20:, :2])) and np.all(np.isfinite(traj[:20, :2]))
+
+
+def test_nothing_to_plot_when_the_first_window_does_not_fit(tmp_path):
+    # options_fit_mpox as shipped starts at row 37 of a 32-row series: runner and plotting functions
+    # say so and return empty results instead of looking for files.
+    out = str(tmp_path)
+    for function, args, shapes in (
+        (gp.plotFit_GrowthModels, (gp.options_fit_mpox,), [(0,), (0, 5), (0, 0)]),
+        (gp.plotFit_ReproductionNumber, (gp.options_fit_mpox, gp.options_Rt), [(0, 5), (0,), (0, 5)]),
+        (gp.plotRt, (gp.options_fit_mpox, gp.options_Rt), [(0, 4), (0, 0), (0, 0), (0, 5)]),
+    ):
+        with pytest.warns(gp.GrowthPredictWarning, match="incompatible tstart and tend"):
+            result = function(None, None, None, *args, output_dir=out, verbose=False)
+        assert [r.shape for r in result] == shapes
+    far = gp.options_forecast().replace(tstart1=40, tend1=45, windowsize1=20, getperformance=0)
+    for function, extra, shapes in (
+        (gp.plotForecast_GrowthModels, (), [(0,), (0, 5), (0, 0)]),
+        (gp.plotForecast_ReproductionNumber, (gp.options_Rt,), [(0, 5), (0,), (0, 5)]),
+    ):
+        with pytest.warns(gp.GrowthPredictWarning, match="incompatible tstart and tend"):
+            result = function(None, None, None, None, far, *extra, output_dir=out, verbose=False)
+        assert [r.shape for r in result] == shapes
+    assert plt.get_fignums() == [] and os.listdir(out) == []
+
+
+def test_histogram_of_values_equal_up_to_rounding():
+    # Bootstrap values of a parameter that every refit leaves on the same bound can differ in the last
+    # digits only; such a column has no range to divide into ten bins.
+    from growthpredict.plotting import draw_window_figure
+
+    rng = np.random.default_rng(0)
+    n, B = 12, 6
+    Phatss = np.column_stack([
+        rng.normal(2, 0.1, B),                       # r
+        np.full(B, 0.01),                            # p on its lower bound
+        np.ones(B),                                  # a fixed
+        1e9 * (1 + 1e-16 * np.arange(B)),            # K on its upper bound, equal up to rounding
+    ])  # fmt: skip
+    Phatss[1, 3] = np.nextafter(1e9, 2e9)
+    curves = np.abs(rng.normal(50, 5, size=(n, 20 * B)))
+    fig, median1, LB1, UB1 = draw_window_figure(
+        1, Phatss_model1=Phatss, params=tuple(np.array([c.mean(), c.min(), c.max()]) for c in Phatss.T),
+        timevect1=np.arange(n), timevect2=np.arange(n), forecast_model12=curves, fit_model1=curves[:, :B],
+        timevect_all=np.arange(n), data_all=np.full(n, 50.0), forecastingperiod=0, ylabel="cases", model_name1="GLM",
+    )  # fmt: skip
+    hist_axes = fig.get_axes()[:4]
+    assert [sum(p.get_height() for p in ax.patches) for ax in hist_axes] == [B, B, B, B]  # every value is counted
+    lo, hi = hist_axes[3].get_xlim()
+    assert lo < 1e9 < hi and median1.shape == (n,)
